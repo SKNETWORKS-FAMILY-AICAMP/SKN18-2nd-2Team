@@ -10,3 +10,4 @@
 - roc_curve auc: 0.9999839994239792
 - confusion_matrix(precision, recall) => [1.        , 0.        ],
                                         [0.00397614, 0.99602386]
+- recall error: 0.00397614, precision error: 0.
