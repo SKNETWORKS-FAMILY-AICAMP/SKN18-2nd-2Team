@@ -124,7 +124,7 @@ class CatBoost():
         self.pred_tree = self.model.predict(result.test_df_merge)
         self.conf_mx = confusion_matrix(result.test_df_y, self.pred_tree, normalize='true')
         print("=" * 30)
-        print("train.csv confusion matrix")
+        print("test.csv confusion matrix")
         print(self.conf_mx)
 
 if __name__ == "__main__":
