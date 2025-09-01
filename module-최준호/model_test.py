@@ -22,18 +22,18 @@ class Model_Evaluation():
         print(self.do_confusion_matrix(self.catboost_model, result.test_df_final, result.test_df_y))
 
         # 훈련 데이터 f1 evaluation 결과
-        val_acc, val_f1, val_report = self.get_f1_evaluation(self.catboost_model, result.test_final, result.y_test)
+        self.val_acc, self.val_f1, self.val_report = self.get_f1_evaluation(self.catboost_model, result.test_final, result.y_test)
         print("=" * 30)
-        print("validation Accuracy:", val_acc)
-        print("validation Macro-F1:", val_f1)
-        print(val_report)
+        print("validation Accuracy:", self.val_acc)
+        print("validation Macro-F1:", self.val_f1)
+        print(self.val_report)
 
         # 테스트 데이터 f1 evaluation 결과
-        val_acc, val_f1, val_report = self.get_f1_evaluation(self.catboost_model, result.test_df_final, result.test_df_y)
+        self.val_acc, self.val_f1, self.val_report = self.get_f1_evaluation(self.catboost_model, result.test_df_final, result.test_df_y)
         print("=" * 30)
-        print("validation Accuracy:", val_acc)
-        print("validation Macro-F1:", val_f1)
-        print(val_report)
+        print("validation Accuracy:", self.val_acc)
+        print("validation Macro-F1:", self.val_f1)
+        print(self.val_report)
     
     # train.csv에 대한 roc_curve
     def do_roc_curve(self, model, test, predict):
