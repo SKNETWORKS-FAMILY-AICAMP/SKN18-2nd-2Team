@@ -120,6 +120,7 @@ class CatBoost():
         print("train.csv confusion matrix")
         print(self.conf_mx)
 
+        # test.csv에 대한 confusion matrix
         self.pred_tree = self.model.predict(result.test_df_merge)
         self.conf_mx = confusion_matrix(result.test_df_y, self.pred_tree, normalize='true')
         print("=" * 30)
