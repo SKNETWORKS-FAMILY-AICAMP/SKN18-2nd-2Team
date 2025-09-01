@@ -24,6 +24,7 @@ class Model_Evaluation():
         # 훈련 데이터 f1 evaluation 결과
         self.val_acc, self.val_f1, self.val_report = self.get_f1_evaluation(self.catboost_model, result.test_final, result.y_test)
         print("=" * 30)
+        print("train_data f1 evaluation")
         print("validation Accuracy:", self.val_acc)
         print("validation Macro-F1:", self.val_f1)
         print(self.val_report)
@@ -31,6 +32,7 @@ class Model_Evaluation():
         # 테스트 데이터 f1 evaluation 결과
         self.val_acc, self.val_f1, self.val_report = self.get_f1_evaluation(self.catboost_model, result.test_df_final, result.test_df_y)
         print("=" * 30)
+        print("test_data f1 evaluation")
         print("validation Accuracy:", self.val_acc)
         print("validation Macro-F1:", self.val_f1)
         print(self.val_report)
