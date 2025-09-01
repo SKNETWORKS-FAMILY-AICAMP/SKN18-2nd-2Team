@@ -1,7 +1,7 @@
 class Model_Evaluation():
 
-    def __init__(self, result):
-        self.catboost_model = Catboost.CallCatboost(result) # 평가할 모델 호출
+    def __init__(self, result, call_model):
+        self.catboost_model = call_model # 평가할 모델 호출
         print(f'훈련용 평가지표: {self.catboost_model.score(result.train_final, result.y_train)} / 테스트용 평가지표: {self.catboost_model.score(result.test_final, result.y_test)}')
 
         # test.csv에 대한 성능평가
@@ -75,10 +75,57 @@ class Catboost():
         model.fit(result.train_final, result.y_train)
 
         return model
+    
+class RandomForest():
+
+    def CallRandomForest(result):
+        from sklearn.ensemble import RandomForestClassifier
+
+        model_rf = RandomForestClassifier(random_state=result.SEED)
+        model_rf = model_rf.fit(result.train_final, result.y_train)
+
+        return model_rf
+    
+class XGBoost():
+
+    def CallXGBoost(result):
+        from xgboost import XGBClassifier
+
+        model_xgb = XGBClassifier(
+        n_estimators=500,
+        max_depth=6,
+        learning_rate=0.05,
+        random_state=result.SEED,
+        n_jobs=-1
+        )
+        model_xgb = model_xgb.fit(result.train_final, result.y_train)
+
+        return model_xgb
+    
+class LightGBM():
+
+    def CallLightGBM(result):
+        import lightgbm as lgb
+
+        model_lgbm = lgb.LGBMClassifier(random_state=result.SEED)
+        model_lgbm.fit(result.train_final, result.y_train)
+
+        return model_lgbm
 
 if __name__ == "__main__":
     from eda import DataProcessing
     
     result = DataProcessing("./data/train.csv", "./data/test.csv")
-    call_model = Catboost() # 평가할 모델 설정
-    model_test = Model_Evaluation(result)
+    # 테스트 모델명과 모델 호출 방식에 대한 dict타입 input
+    model_call = {
+        "catboost":Catboost.CallCatboost(result),
+        "RandomForest":RandomForest.CallRandomForest(result),
+        "XGBoost":XGBoost.CallXGBoost(result),
+        "LightGBM":LightGBM.CallLightGBM(result)
+    }
+    # 모든 모델에 대한 테스트 결과 출력
+    for i in model_call.keys():
+        call_model = model_call[i]
+        print(f"<{i}>의 성능결과")
+        print("#" * 30)
+        Model_Evaluation(result, call_model)
