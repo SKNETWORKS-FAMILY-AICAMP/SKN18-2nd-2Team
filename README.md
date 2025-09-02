@@ -3,10 +3,6 @@
 ## 프로젝트 개요
 
 
-
-
-
-
 ### 2.1 폴더 구조
 ├── data
 │   ├── netflix_customer_churn.csv  # raw data
