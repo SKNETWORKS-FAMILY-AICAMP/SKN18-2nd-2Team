@@ -1,9 +1,9 @@
 # 데이터 불러오기
 
 import pandas as pd
-import numpy as np
 import os
 import easydict
+from sklearn.model_selection import train_test_split
 
 # 프로젝트 설정 및 경로 정보 반환
 def get_args():
@@ -35,10 +35,10 @@ def data_load():
 
     return train_data, test_data
 
-#필요없는 컬럼(user_id) 제거 및 인덱스 설정
-
-def prepare_data(train_data, test_data):
-    train_porcessed = train_data.drop(columns=["user_id"])
-    test_processed = test_data.set_index("user_id")
-    return train_porcessed, test_processed
-
+def data_split(train_data, test_size=0.2):
+    train_split, validation_split = train_test_split(
+    train_data, 
+    test_size=test_size, 
+    stratify=train_data['churned']  # 타겟 변수 기준으로 계층적 분할
+    )
+    return train_split, validation_split

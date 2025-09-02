@@ -289,6 +289,87 @@ def save_results(results_df):
     
     print(f" 요약이 {summary_path}에 저장되었습니다.")
 
+def test_on_final_test_set():
+    """
+    test.csv로 최종 테스트를 진행하는 함수
+    """
+    print("=" * 60)
+    print("최종 테스트 데이터(test.csv)로 모델 성능 평가")
+    print("=" * 60)
+    
+    # 1. 모델 로드
+    models = load_models()
+    if not models:
+        print(" 로드할 모델이 없습니다. 먼저 모델을 학습해주세요.")
+        return
+    
+    # 2. 데이터 로드 (test.csv만 사용)
+    print("\n 테스트 데이터를 로드합니다...")
+    try:
+        from utilities.preprocess import get_preprocessed_data
+        X_train, X_test, y_train = get_preprocessed_data()
+        print(f"테스트 데이터 로드 완료: X_test shape={X_test.shape}")
+    except Exception as e:
+        print(f" 데이터 로드 실패: {e}")
+        return
+    
+    # 3. 최고 성능 모델 찾기 (validation 결과 기반)
+    print("\n 최고 성능 모델을 찾는 중...")
+    try:
+        # validation 결과 파일에서 최고 성능 모델 찾기
+        import pandas as pd
+        results_df = pd.read_csv('./result/model_evaluation_results.csv')
+        best_model_name = results_df.loc[results_df['Test_Accuracy'].idxmax(), 'Model']
+        print(f" 최고 성능 모델: {best_model_name}")
+        
+        # 해당 모델로 테스트 데이터 예측
+        best_model = models[best_model_name]
+        y_test_pred = best_model.predict(X_test)
+        
+        # 예측 결과 저장
+        import pandas as pd
+        test_predictions = pd.DataFrame({
+            'customer_id': range(len(y_test_pred)),  # customer_id 생성
+            'churned': y_test_pred
+        })
+        
+        # 결과 저장
+        test_predictions.to_csv('./result/final_test_predictions.csv', index=False)
+        print(f" 최종 테스트 예측 결과가 './result/final_test_predictions.csv'에 저장되었습니다.")
+        
+        # 예측 결과 요약
+        print(f"\n 최종 테스트 예측 결과 요약:")
+        print(f" 총 예측 샘플 수: {len(y_test_pred)}")
+        print(f" 이탈 예측 수: {sum(y_test_pred)}")
+        print(f" 이탈률: {sum(y_test_pred)/len(y_test_pred)*100:.2f}%")
+        
+    except Exception as e:
+        print(f" 최종 테스트 실행 중 오류 발생: {e}")
+        print(" 모든 모델로 테스트를 진행합니다...")
+        
+        # 모든 모델로 테스트 진행
+        test_results = []
+        for model_name, model in models.items():
+            try:
+                y_test_pred = model.predict(X_test)
+                test_results.append({
+                    'Model': model_name,
+                    'Predictions': y_test_pred
+                })
+                print(f" {model_name} 테스트 완료")
+            except Exception as e:
+                print(f" {model_name} 테스트 실패: {e}")
+        
+        if test_results:
+            # 첫 번째 모델의 예측 결과를 기본으로 사용
+            best_result = test_results[0]
+            test_predictions = pd.DataFrame({
+                'customer_id': range(len(best_result['Predictions'])),
+                'churned': best_result['Predictions']
+            })
+            test_predictions.to_csv('./result/final_test_predictions.csv', index=False)
+            print(f" 최종 테스트 예측 결과가 './result/final_test_predictions.csv'에 저장되었습니다.")
+
 def main():
     """
     메인 함수
@@ -306,23 +387,32 @@ def main():
     
     print(f" {len(models)}개의 모델이 로드되었습니다.")
     
-    # 2. 데이터 로드
+    # 2. 데이터 로드 (validation 데이터 포함)
     print("\n 데이터를 로드합니다...")
     try:
-        X_train, X_test, y_train = get_preprocessed_data()
+        from utilities.preprocess import get_preprocessed_data
+        X_train, X_test, y_train, X_validation, y_validation = get_preprocessed_data()
         print(f"데이터 로드 완료: X_train shape={X_train.shape}")
+        print(f"검증 데이터: X_validation shape={X_validation.shape}")
+        print(f"테스트 데이터: X_test shape={X_test.shape}")
     except Exception as e:
         print(f" 데이터 로드 실패: {e}")
         return
     
-    # 3. 모델 평가
-    results_df = evaluate_models(models, X_train, y_train, X_test, y_train)  # 테스트 데이터는 학습 데이터로 대체
+    # 3. 모델 평가 (validation 데이터로 평가)
+    print("\n검증 데이터로 모델 성능 평가 중...")
+    results_df = evaluate_models(models, X_train, y_train, X_validation, y_validation)
     
     # 4. 결과 저장
     save_results(results_df)
     
     # 5. 시각화
     create_visualizations(results_df)
+    
+    # 6. 최종 테스트 (test.csv)
+    print("\n" + "="*60)
+    print("최종 테스트 단계로 진행합니다...")
+    test_on_final_test_set()
     
     print("\n 모델 성능 평가가 완료되었습니다!")
     print(" 결과 파일들이 './result/' 폴더에 저장되었습니다.")

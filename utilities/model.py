@@ -331,6 +331,57 @@ def __run_hpo(best_params, X_selected, y_smote):
 
     return final_models
 
+def __evaluate_validation_performance(final_models, X_validation, y_validation):
+    """
+    validation 데이터로 모델 성능을 평가하는 함수
+    """
+    from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+    
+    print("=" * 60)
+    print("검증 데이터 성능 평가 결과")
+    print("=" * 60)
+    
+    validation_results = []
+    
+    for model_name, model in final_models.items():
+        try:
+            # 예측 수행
+            y_validation_pred = model.predict(X_validation)
+            y_validation_proba = model.predict_proba(X_validation)[:, 1] if hasattr(model, 'predict_proba') else None
+            
+            # 메트릭 계산
+            accuracy = accuracy_score(y_validation, y_validation_pred)
+            precision = precision_score(y_validation, y_validation_pred, average='weighted')
+            recall = recall_score(y_validation, y_validation_pred, average='weighted')
+            f1 = f1_score(y_validation, y_validation_pred, average='weighted')
+            auc = roc_auc_score(y_validation, y_validation_proba) if y_validation_proba is not None else 0
+            
+            validation_results.append({
+                'Model': model_name,
+                'Validation_Accuracy': accuracy,
+                'Validation_Precision': precision,
+                'Validation_Recall': recall,
+                'Validation_F1': f1,
+                'Validation_AUC': auc
+            })
+            
+            print(f"{model_name:<20} | Accuracy: {accuracy:.4f} | F1: {f1:.4f} | AUC: {auc:.4f}")
+            
+        except Exception as e:
+            print(f"{model_name:<20} | 평가 실패: {e}")
+    
+    # 최고 성능 모델 찾기
+    if validation_results:
+        best_model = max(validation_results, key=lambda x: x['Validation_Accuracy'])
+        print("=" * 60)
+        print(f"최고 성능 모델 (검증 데이터 기준): {best_model['Model']}")
+        print(f"검증 정확도: {best_model['Validation_Accuracy']:.4f}")
+        print(f"검증 F1 점수: {best_model['Validation_F1']:.4f}")
+        print(f"검증 AUC: {best_model['Validation_AUC']:.4f}")
+        print("=" * 60)
+    
+    return validation_results
+
     # 베이스 모델 저장
 def __save_models(final_models):
     # 모델들을 저장할 디렉토리 설정
@@ -352,7 +403,7 @@ def __save_models(final_models):
 
 
 @reset_seeds
-def get_model(X_train=None, y_train=None, X_test=None, y_test=None, auto_load=True):
+def get_model(X_train=None, y_train=None, X_test=None, y_test=None, X_validation=None, y_validation=None, auto_load=True):
     """
     자동으로 데이터를 인식하고 모델을 학습하는 함수
     
@@ -361,6 +412,8 @@ def get_model(X_train=None, y_train=None, X_test=None, y_test=None, auto_load=Tr
     y_train: 학습 타겟 데이터 (Series)
     X_test: 테스트 피처 데이터 (DataFrame, 선택사항)
     y_test: 테스트 타겟 데이터 (Series, 선택사항)
+    X_validation: 검증 피처 데이터 (DataFrame, 선택사항)
+    y_validation: 검증 타겟 데이터 (Series, 선택사항)
     auto_load: 데이터가 없을 때 자동 로드 여부 (기본값: True)
     
     Returns:
@@ -371,8 +424,10 @@ def get_model(X_train=None, y_train=None, X_test=None, y_test=None, auto_load=Tr
         print(" 데이터를 자동으로 로드합니다...")
         try:
             from utilities.preprocess import get_preprocessed_data
-            X_train, X_test, y_train = get_preprocessed_data()
+            X_train, X_test, y_train, X_validation, y_validation = get_preprocessed_data()
             print(f" 데이터 로드 완료: X_train shape={X_train.shape}, y_train shape={y_train.shape}")
+            if X_validation is not None:
+                print(f" 검증 데이터: X_validation shape={X_validation.shape}, y_validation shape={y_validation.shape}")
         except Exception as e:
             print(f"데이터 로드 실패: {e}")
             print("직접 데이터를 전달해주세요.")
@@ -386,13 +441,25 @@ def get_model(X_train=None, y_train=None, X_test=None, y_test=None, auto_load=Tr
     if X_train.shape[0] != y_train.shape[0]:
         raise ValueError(f"X_train과 y_train의 샘플 수가 일치하지 않습니다: X_train={X_train.shape[0]}, y_train={y_train.shape[0]}")
     
+    if X_validation is not None and y_validation is not None:
+        if X_validation.shape[0] != y_validation.shape[0]:
+            raise ValueError(f"X_validation과 y_validation의 샘플 수가 일치하지 않습니다: X_validation={X_validation.shape[0]}, y_validation={y_validation.shape[0]}")
+    
     print(f"모델 학습 시작...")
     print(f"학습 데이터 형태: {X_train.shape}")
     print(f"타겟 데이터 형태: {y_train.shape}")
+    if X_validation is not None:
+        print(f"검증 데이터 형태: {X_validation.shape}")
     
     # 하이퍼파라미터 최적화 및 모델 학습
     best_params = __run_prehpo(X_train, y_train)
     final_models = __run_hpo(best_params, X_train, y_train)
+    
+    # validation 데이터가 있는 경우 validation 성능 평가
+    if X_validation is not None and y_validation is not None:
+        print("\n검증 데이터로 모델 성능 평가 중...")
+        __evaluate_validation_performance(final_models, X_validation, y_validation)
+    
     __save_models(final_models)
     
     print(f" 모델 학습 완료! {len(final_models)}개의 모델이 저장되었습니다.")

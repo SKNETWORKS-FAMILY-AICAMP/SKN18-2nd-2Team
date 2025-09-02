@@ -7,8 +7,9 @@ from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import SMOTE
 import warnings
 warnings.filterwarnings('ignore')
+from utilities.utils import prepare_data
 
-def preprocess_data(train_data, test_data):
+def preprocess_data(train_data, test_data, validation_data):
     """
     전체 데이터 전처리 파이프라인
     
@@ -27,16 +28,16 @@ def preprocess_data(train_data, test_data):
     # 1. 데이터 타입 확인 및 변환
     train_processed = convert_data_types(train_data)
     test_processed = convert_data_types(test_data)
+    validation_processed = convert_data_types(validation_data)
     
     # 2. 범주형 변수 인코딩
-    train_encoded, test_encoded = encode_categorical_variables(train_processed, test_processed)
+    train_encoded, test_encoded, validation_encoded = encode_categorical_variables(train_processed, test_processed, validation_processed)
     
     # 3. 피처와 타겟 분리
-    X_train, y_train = separate_features_target(train_encoded)
-    X_test = test_encoded.drop(columns=['customer_id'])  # customer_id는 제거
+    X_train, y_train, X_test, X_validation, y_validation = prepare_data(train_encoded, test_encoded, validation_encoded)
     
     # 4. 수치형 변수 스케일링
-    X_train_scaled, X_test_scaled = scale_numerical_features(X_train, X_test)
+    X_train_scaled, X_test_scaled, X_validation_scaled = scale_numerical_features(X_train, X_test, X_validation)
     
     # 5. SMOTE를 사용한 불균형 데이터 처리
     X_train_smote, y_train_smote = apply_smote(X_train_scaled, y_train)
@@ -44,8 +45,9 @@ def preprocess_data(train_data, test_data):
     print("데이터 전처리 완료!")
     print(f"전처리 후 학습 데이터 형태: {X_train_smote.shape}")
     print(f"전처리 후 테스트 데이터 형태: {X_test_scaled.shape}")
+    print(f"전처리 후 검증 데이터 형태: {X_validation_scaled.shape}")
     
-    return X_train_smote, X_test_scaled, y_train_smote
+    return X_train_smote, X_test_scaled, y_train_smote, X_validation_scaled, y_validation
 
 def convert_data_types(data):
     """
@@ -73,12 +75,13 @@ def convert_data_types(data):
     
     return data_processed
 
-def encode_categorical_variables(train_data, test_data):
+def encode_categorical_variables(train_data, test_data, validation_data):
     """
     범주형 변수를 숫자로 인코딩
     """
     train_encoded = train_data.copy()
     test_encoded = test_data.copy()
+    validation_encoded = validation_data.copy()
     
     # LabelEncoder를 사용하여 범주형 변수 인코딩
     categorical_columns = ['gender', 'subscription_type', 'region', 'device', 
@@ -97,10 +100,11 @@ def encode_categorical_variables(train_data, test_data):
             # 인코딩 적용
             train_encoded[col] = le.transform(train_encoded[col])
             test_encoded[col] = le.transform(test_encoded[col])
+            validation_encoded[col] = le.transform(validation_encoded[col])
             
             label_encoders[col] = le
     
-    return train_encoded, test_encoded
+    return train_encoded, test_encoded, validation_encoded
 
 def separate_features_target(data):
     """
@@ -117,7 +121,7 @@ def separate_features_target(data):
     
     return X, y
 
-def scale_numerical_features(X_train, X_test):
+def scale_numerical_features(X_train, X_test, X_validation):
     """
     수치형 변수 스케일링
     """
@@ -130,13 +134,15 @@ def scale_numerical_features(X_train, X_test):
         # 학습 데이터로 fit하고 transform
         X_train_scaled = X_train.copy()
         X_test_scaled = X_test.copy()
+        X_validation_scaled = X_validation.copy()
         
         X_train_scaled[numeric_columns] = scaler.fit_transform(X_train[numeric_columns])
         X_test_scaled[numeric_columns] = scaler.transform(X_test[numeric_columns])
+        X_validation_scaled[numeric_columns] = scaler.transform(X_validation[numeric_columns])
         
-        return X_train_scaled, X_test_scaled
+        return X_train_scaled, X_test_scaled, X_validation_scaled
     else:
-        return X_train, X_test
+        return X_train, X_test, X_validation
 
 def apply_smote(X, y):
     """
@@ -164,16 +170,22 @@ def get_preprocessed_data():
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     
     from utilities.data_load import data_load
+    from utilities.data_load import data_split
     
     # 데이터 로드
     train_data, test_data = data_load()
     
-    # 전처리 수행
-    X_train_processed, X_test_processed, y_train_processed = preprocess_data(train_data, test_data)
+    # train 데이터를 train과 validation으로 분할
+    train_split, validation_split = data_split(train_data)
     
-    return X_train_processed, X_test_processed, y_train_processed
+    # 전처리 수행
+    X_train_processed, X_test_processed, y_train_processed, X_validation_processed, y_validation_processed = preprocess_data(
+        train_split, test_data, validation_split
+    )
+    
+    return X_train_processed, X_test_processed, y_train_processed, X_validation_processed, y_validation_processed
 
 if __name__ == "__main__":
     # 테스트 실행
-    X_train, X_test, y_train = get_preprocessed_data()
+    X_train, X_test, y_train, X_validation, y_validation = get_preprocessed_data()
     print("전처리 테스트 완료!")
