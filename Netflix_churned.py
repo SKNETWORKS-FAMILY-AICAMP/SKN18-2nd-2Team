@@ -10,6 +10,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.metrics import accuracy_score, f1_score, classification_report
 
 from xgboost import XGBClassifier
+from sklearn.svm import SVC
 
 plt.rcParams['font.family'] = 'Malgun Gothic'
 plt.rcParams['axes.unicode_minus'] = False
@@ -63,7 +64,6 @@ def build_preprocessor(X: pd.DataFrame) -> ColumnTransformer:
 
 def EDA(train_df: pd.DataFrame):
     """탐색적 데이터 분석 (EDA)"""
-    print("Train Data Shape:", train_df.shape)
 
     # 결측치 시각화
     plt.figure(figsize=(12, 6))
@@ -182,6 +182,48 @@ def plot_feature_importances(model, feature_names, out_png="./images/feature_imp
     plt.savefig(out_png)
     plt.close()
 
+def train_and_evaluate(model, model_name, X, y, testset, test_target, pre):
+    """모델 학습 & 평가 공통 함수"""
+    pipe = Pipeline([
+        ("pre", pre),
+        ("model", model),
+    ])
+
+    # Train/Test split
+    X_train, X_val, y_train, y_val = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
+    )
+
+    pipe.fit(X_train, y_train)
+
+    # 내부 검증 성능
+    y_val_pred = pipe.predict(X_val)
+    val_acc = accuracy_score(y_val, y_val_pred)
+    val_f1 = f1_score(y_val, y_val_pred, average="macro")
+
+    print(f"\n=== {model_name} Validation Results ===")
+    print("Validation Accuracy:", val_acc)
+    print("Validation Macro-F1:", val_f1)
+    print(classification_report(y_val, y_val_pred))
+
+    # 외부 테스트 성능
+    test_pred = pipe.predict(testset)
+    test_acc = accuracy_score(test_target, test_pred)
+    test_f1 = f1_score(test_target, test_pred, average="macro")
+
+    print(f"\n=== {model_name} Test Results ===")
+    print("Test Accuracy:", test_acc)
+    print("Test Macro-F1:", test_f1)
+    print(classification_report(test_target, test_pred))
+
+    return {
+        "model": model_name,
+        "val_acc": val_acc,
+        "val_f1": val_f1,
+        "test_acc": test_acc,
+        "test_f1": test_f1,
+    }
+
 
 def main():
     # 데이터 불러오기
@@ -192,7 +234,7 @@ def main():
     test_df = pd.read_csv(test_dataset)
     
     # EDA
-    EDA(train_df)
+    # EDA(train_df)
 
     # 타깃 컬럼
     target = "churned"
@@ -208,8 +250,8 @@ def main():
         testset.drop(columns=unique_cols, inplace=True)
 
     # feature engineering
-    X = feature_engineering(X)
-    testset = feature_engineering(testset)
+    # X = feature_engineering(X)
+    # testset = feature_engineering(testset)
 
     # 결측치 제거
     data = pd.concat([X, y], axis=1).dropna()
@@ -218,7 +260,7 @@ def main():
 
     # 전처리기 & 모델
     pre = build_preprocessor(X)
-    model = XGBClassifier(
+    xgb_model = XGBClassifier(
         n_estimators=500,
         max_depth=6,
         learning_rate=0.05,
@@ -226,67 +268,32 @@ def main():
         n_jobs=-1
     )
 
-    pipe = Pipeline([
-        ("pre", pre),
-        ("model", model),
-    ])
-
-    # Train/Test split
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42, stratify=y
+    svc_model = SVC(
+        kernel="rbf",
+        C=1.0,
+        probability=True,  # 필요시 ROC/AUC 등 확률 기반 평가 가능
+        random_state=42
     )
 
-    # 학습
-    pipe.fit(X_train, y_train)
+    # 결과 비교
+    results = []
+    results.append(train_and_evaluate(xgb_model, "XGBoost", X, y, testset, test_target, pre))
+    results.append(train_and_evaluate(svc_model, "SVC", X, y, testset, test_target, pre))
 
-    # 내부 검증 성능 평가
-    y_pred = pipe.predict(X_test)
-    val_acc = accuracy_score(y_test, y_pred)
-    val_f1 = f1_score(y_test, y_pred, average="macro")
-    val_report = classification_report(y_test, y_pred)
-
-    print("validation Accuracy:", val_acc)
-    print("validation Macro-F1:", val_f1)
-    print(val_report)
-
-    # 외부 검증 성능 평가
-    testset_pred = pipe.predict(testset)
-    test_acc = accuracy_score(test_target, testset_pred)
-    test_f1 = f1_score(test_target, testset_pred, average="macro")
-    test_report = classification_report(test_target, testset_pred)
-
-    print("Test Accuracy:", test_acc)
-    print("Test Macro-F1:", test_f1)
-    print("Test Classification Report:\n", test_report)
-
-    # 모델 저장 (Booster만 저장)
-    booster = pipe.named_steps["model"]
-    booster.save_model("xgb_classifier_model.json")
-
-    # Feature Importance 저장
-    preproc = pipe.named_steps["pre"]
-    cat_cols = preproc.transformers_[0][2]
-    num_cols = preproc.transformers_[1][2]
-    feature_names = []
-
-    # 범주형 피처 이름 추출
-    cat_encoder = preproc.named_transformers_["cat"]
-    if hasattr(cat_encoder, "get_feature_names_out"):
-        feature_names = list(cat_encoder.get_feature_names_out(cat_cols))
-    feature_names += list(num_cols)
-
-    plot_feature_importances(booster, feature_names, out_png="./images/feature_importances.png")
-
-    # 리포트 저장
+    print("\n=== 최종 비교 결과 ===")
     with open("./images/training_report.txt", "w", encoding="utf-8") as f:
-        f.write(f"Validation Accuracy: {val_acc:.4f}\n")
-        f.write(f"Validation Macro-F1: {val_f1:.4f}\n\n")
-        f.write(val_report)
-        f.write("\n\n")
-        f.write(f"Test Accuracy: {test_acc:.4f}\n")
-        f.write(f"Test Macro-F1: {test_f1:.4f}\n\n")
-        f.write(test_report)
-
+        for r in results:
+            print(f"{r['model']}: "
+                f"ValAcc={r['val_acc']:.4f}, ValF1={r['val_f1']:.4f}, "
+                f"TestAcc={r['test_acc']:.4f}, TestF1={r['test_f1']:.4f}")
+            f.write(f"{r['model']}\n")
+            f.write(f"Validation Accuracy: {r['val_acc']:.4f}\n")
+            f.write(f"Validation Macro-F1: {r['val_f1']:.4f}\n\n")
+            f.write("\n\n")
+            f.write(f"Test Accuracy: {r['test_acc']:.4f}\n")
+            f.write(f"Test Macro-F1: {r['test_f1']:.4f}\n\n")
+            f.write("\n\n")
 
 if __name__ == "__main__":
     main()
+
