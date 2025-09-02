@@ -59,8 +59,8 @@
 ### 📊 favorite_genre, churned
 ![device churned barplot](EDA/images/genre_churned.png)
 
-️️️️️- 이탈률이 높은 장르: Action, Documentary, Drama, Horror
+️️️️️️️️️️➡️ 이탈률이 높은 장르: Action, Documentary, Drama, Horror
 
-️️️️- 이탈률이 낮은 장르: Comedy, Romance, Sci-Fi
+️️️️️️️️️➡️ 이탈률이 낮은 장르: Comedy, Romance, Sci-Fi
 
-️️️️- 이탈률이 상당히 높은 장르: Horror, Action => 이 장르를 선호하는 고객에 대한 마케팅 및 서비스 개선 필요
+️️️️️️️️️➡️ 이탈률이 상당히 높은 장르: Horror, Action => 이 장르를 선호하는 고객에 대한 마케팅 및 서비스 개선 필요
