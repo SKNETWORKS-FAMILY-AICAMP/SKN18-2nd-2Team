@@ -64,3 +64,26 @@
 ️️️️️️️️️➡️ 이탈률이 낮은 장르: Comedy, Romance, Sci-Fi
 
 ️️️️️️️️️➡️ 이탈률이 상당히 높은 장르: Horror, Action => 이 장르를 선호하는 고객에 대한 마케팅 및 서비스 개선 필요
+
+---
+
+## 🧾 각 category feature별 시청시간(watch_hours)비율
+
+### 📊 subscription_type, watch_hours
+![subscription_type watch_hours](EDA/images/subscription_WatchHours.png)
+
+️️️️️️️️️➡️ subscription_type에 대한 시청시간의 차이가 없음
+
+---
+
+### 📊 region, watch_hours
+![region watch_hours](EDA/images/region_WatchHours.png)
+
+️️️️️️️️➡️ North America의 시청시간이 제일 많음
+
+---
+
+### 📊 payment_method, watch_hours
+![payment_method watch_hours](EDA/images/payment_WatchHours.png)
+
+️️️️️️️️➡️ payment_method별 시청시간은 큰 차이가 없으나, Gift Card의 시청시간이 약간 적음
