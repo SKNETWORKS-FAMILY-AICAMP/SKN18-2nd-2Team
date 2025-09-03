@@ -1,5 +1,5 @@
 from EDA import EDA
-from utils import load_data, write_result
+from utils import load_data, write_result, save_results_plot
 from preprocess import feature_engineering, remove_unique_cols, build_preprocessor, clean_data
 from model import train_and_evaluate, load_models
 
@@ -35,6 +35,7 @@ def main():
             print(f"[WARN] {name} 실패: {e}")
 
     write_result(results)
+    save_results_plot(results)
 
 if __name__ == "__main__":
     main()
