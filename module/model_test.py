@@ -1,28 +1,28 @@
 class Model_Evaluation():
 
     def __init__(self, result, call_model):
-        self.catboost_model = call_model # 평가할 모델 호출
-        print(f'훈련용 평가지표: {self.catboost_model.score(result.train_final, result.y_train)} / 테스트용 평가지표: {self.catboost_model.score(result.test_final, result.y_test)}')
+        self.call_model = call_model # 평가할 모델 호출
+        print(f'훈련용 평가지표: {self.call_model.score(result.train_final, result.y_train)} / 테스트용 평가지표: {self.call_model.score(result.test_final, result.y_test)}')
 
         # test.csv에 대한 성능평가
-        print(f'test.csv 평가지표: {self.catboost_model.score(result.test_df_final, result.test_df_y)}')
+        print(f'test.csv 평가지표: {self.call_model.score(result.test_df_final, result.test_df_y)}')
         # train.csv에 대한 roc_curve
-        print(f"train.csv에 대한 로컬PC Score: {self.do_roc_curve(self.catboost_model, result.test_final, result.y_test)}")
+        print(f"train.csv에 대한 로컬PC Score: {self.do_roc_curve(self.call_model, result.test_final, result.y_test)}")
         # test.csv에 대한 roc_curve
-        print(f"test.csv에 대한 로컬PC Score: {self.do_roc_curve(self.catboost_model, result.test_df_final, result.test_df_y)}")
+        print(f"test.csv에 대한 로컬PC Score: {self.do_roc_curve(self.call_model, result.test_df_final, result.test_df_y)}")
 
         # train.csv에 대한 confusion matrix
         print("=" * 30)
         print("train.csv confusion matrix")
-        print(self.do_confusion_matrix(self.catboost_model, result.test_final, result.y_test))
+        print(self.do_confusion_matrix(self.call_model, result.test_final, result.y_test))
 
         # test.csv에 대한 confusion matrix
         print("=" * 30)
         print("test.csv confusion matrix")
-        print(self.do_confusion_matrix(self.catboost_model, result.test_df_final, result.test_df_y))
+        print(self.do_confusion_matrix(self.call_model, result.test_df_final, result.test_df_y))
 
         # 훈련 데이터 f1 evaluation 결과
-        self.val_acc, self.val_f1, self.val_report = self.get_f1_evaluation(self.catboost_model, result.test_final, result.y_test)
+        self.val_acc, self.val_f1, self.val_report = self.get_f1_evaluation(self.call_model, result.test_final, result.y_test)
         print("=" * 30)
         print("train_data f1 evaluation")
         print("validation Accuracy:", self.val_acc)
@@ -30,7 +30,7 @@ class Model_Evaluation():
         print(self.val_report)
 
         # 테스트 데이터 f1 evaluation 결과
-        self.val_acc, self.val_f1, self.val_report = self.get_f1_evaluation(self.catboost_model, result.test_df_final, result.test_df_y)
+        self.val_acc, self.val_f1, self.val_report = self.get_f1_evaluation(self.call_model, result.test_df_final, result.test_df_y)
         print("=" * 30)
         print("test_data f1 evaluation")
         print("validation Accuracy:", self.val_acc)
