@@ -67,7 +67,7 @@
 
 ---
 
-## 🧾 각 category feature별 시청시간(watch_hours)비율
+## 🧾 각 category feature별 시청시간(watch_hours)평균
 
 ### 📊 subscription_type, watch_hours
 ![subscription_type watch_hours](EDA/images/subscription_WatchHours.png)
@@ -87,3 +87,28 @@
 ![payment_method watch_hours](EDA/images/payment_WatchHours.png)
 
 ️️️️️️️️➡️ payment_method별 시청시간은 큰 차이가 없으나, Gift Card의 시청시간이 약간 적음
+
+---
+
+## 🧾 각 category feature별 마지막 로그인 경과일(last_login_days)평균
+
+### 📊 subscription_type, last_login_days
+![payment_method watch_hours](EDA/images/subscription_LastLogin.png)
+
+️️️️️️️️️➡️ standard의 마지막 로그인 경과일이 약간 낮은 편이나, 별 차이가 없음
+
+---
+
+### 📊 region, last_login_days
+![payment_method watch_hours](EDA/images/region_LastLogin.png)
+
+️️️️️️️️️➡️ 북미(North America)의 마지막 로그인 경과일이 긴 편임
+
+---
+
+### 📊 payment_method, last_login_days
+![payment_method watch_hours](EDA/images/payment_LastLogin.png)
+
+️️️️️️️️️➡️ Credit Card의 마지막 로그인 경과일이 짧은 편이지만, 큰 차이가 없음
+
+---
