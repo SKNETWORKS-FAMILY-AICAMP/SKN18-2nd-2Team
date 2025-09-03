@@ -68,7 +68,7 @@ class Model_Evaluation():
 
         return self.val_acc, self.val_f1, self.val_report
 
-class Catboost():
+class CallModel():
 
     def CallCatboost(result):
         from catboost import CatBoostClassifier
@@ -78,8 +78,6 @@ class Catboost():
 
         return model
     
-class RandomForest():
-
     def CallRandomForest(result):
         from sklearn.ensemble import RandomForestClassifier
 
@@ -87,8 +85,6 @@ class RandomForest():
         model_rf = model_rf.fit(result.train_final, result.y_train)
 
         return model_rf
-    
-class XGBoost():
 
     def CallXGBoost(result):
         from xgboost import XGBClassifier
@@ -103,8 +99,6 @@ class XGBoost():
         model_xgb = model_xgb.fit(result.train_final, result.y_train)
 
         return model_xgb
-    
-class LightGBM():
 
     def CallLightGBM(result):
         import lightgbm as lgb
@@ -120,10 +114,10 @@ if __name__ == "__main__":
     result = DataProcessing("./data/train.csv", "./data/test.csv")
     # 테스트 모델명과 모델 호출 방식에 대한 dict타입 input
     model_call = {
-        "catboost":Catboost.CallCatboost(result),
-        "RandomForest":RandomForest.CallRandomForest(result),
-        "XGBoost":XGBoost.CallXGBoost(result),
-        "LightGBM":LightGBM.CallLightGBM(result)
+        "catboost":CallModel.CallCatboost(result),
+        "RandomForest":CallModel.CallRandomForest(result),
+        "XGBoost":CallModel.CallXGBoost(result),
+        "LightGBM":CallModel.CallLightGBM(result)
     }
     # 모든 모델에 대한 테스트 결과 출력
     for i in model_call.keys():
