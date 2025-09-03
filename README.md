@@ -33,6 +33,9 @@
 
 ## 🖼️ 시각화 결과
 
+### 🔄️ 타겟과의 상관관계
+![Target correlation](images/correlation_heatmap.png)
+
 ### 🎯 타깃 분포
 ![Target Distribution](images/target_distribution.png)
 
@@ -70,14 +73,35 @@
 
 ---
 
-### ⭐ XGBoost Feature Importances
-![Feature Importances](images/feature_importances.png)  
+### ⭐Feature Importances
+    ➡️ 각 모델의 중요도 상위피쳐
+<p align="center">
+  <a href="images/feature_importances/AdaBoost_feature_importances.png"><img src="images/feature_importances/AdaBoost_feature_importances.png" width="450"/></a>
+  <a href="images/feature_importances/CatBoost_feature_importances.png"><img src="images/feature_importances/CatBoost_feature_importances.png" width="450"/></a>
+  <a href="images/feature_importances/ExtraTrees_feature_importances.png"><img src="images/feature_importances/ExtraTrees_feature_importances.png" width="450"/></a>
+</p>
 
-➡️ 중요도 상위 피처:
-- `avg_watch_time_per_day`, `watch_hours`
-- `subscription_type_Basic`
-- `payment_method_Crypto`, `payment_method_Gift Card`
-- `last_login_days`
+<p align="center">
+  <a href="images/feature_importances/HistGradientBoosting_feature_importances.png"><img src="images/feature_importances/HistGradientBoosting_feature_importances.png" width="450"/></a>
+  <a href="images/feature_importances/KNeighbors_feature_importances.png"><img src="images/feature_importances/KNeighbors_feature_importances.png" width="450"/></a>
+  <a href="images/feature_importances/LightGBM_feature_importances.png"><img src="images/feature_importances/LightGBM_feature_importances.png" width="450"/></a>
+</p>
+
+<p align="center">
+  <a href="images/feature_importances/MLPClassifier_feature_importances.png"><img src="images/feature_importances/MLPClassifier_feature_importances.png" width="450"/></a>
+  <a href="images/feature_importances/RandomForest_feature_importances.png"><img src="images/feature_importances/RandomForest_feature_importances.png" width="450"/></a>
+  <a href="images/feature_importances/RidgeClassifier_feature_importances.png"><img src="images/feature_importances/RidgeClassifier_feature_importances.png" width="450"/></a>
+</p>
+
+<p align="center">
+  <a href="images/feature_importances/XGBoost_feature_importances.png"><img src="images/feature_importances/XGBoost_feature_importances.png" width="450"/></a>
+  <a href="images/feature_importances/GradientBoosting_feature_importances.png"><img src="images/feature_importances/GradientBoosting_feature_importances.png" width="450"/></a>
+  <a href="images/feature_importances/SVC_feature_importances.png"><img src="images/feature_importances/SVC_feature_importances.png" width="450"/></a>
+</p>
+
+<p align="center">
+  <a href="images/feature_importances/LogisticRegression_feature_importances.png"><img src="images/feature_importances/LogisticRegression_feature_importances.png" width="450"/></a>
+</p>
 
 ---
 
