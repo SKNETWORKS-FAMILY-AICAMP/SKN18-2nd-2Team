@@ -1,4 +1,5 @@
 import os
+import joblib
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score
@@ -21,6 +22,7 @@ import lightgbm as lgb
 from catboost import CatBoostClassifier
 
 RANDOM_STATE = 42
+MODEL_DIR = "./saved_models"
 
 def load_models():
     return {
@@ -49,9 +51,12 @@ def train_and_evaluate(model, model_name, X, y, testset, test_target, pre):
     X_train, X_val, y_train, y_val = train_test_split(
         X, y, test_size=0.2, random_state=RANDOM_STATE, stratify=y
     )
-
+    # 모델 학습
     pipe.fit(X_train, y_train)
-
+    
+    # 모델 저장
+    save_model(pipe, model_name)
+    
     # 피처 중요도 저장 (Validation set 기준)
     out_dir = "./images/feature_importances"
     out_png = os.path.join(out_dir, f"{model_name}_feature_importances.png")
@@ -75,3 +80,16 @@ def train_and_evaluate(model, model_name, X, y, testset, test_target, pre):
         "test_acc": test_acc,
         "test_f1": test_f1,
     }
+
+def save_model(pipe, model_name):
+    """최종 학습된 모델 저장"""
+    os.makedirs(MODEL_DIR, exist_ok=True)
+    path = os.path.join(MODEL_DIR, f"{model_name}.pkl")
+    joblib.dump(pipe, path)
+
+def load_saved_model(model_name):
+    """저장된 모델 불러오기"""
+    path = os.path.join(MODEL_DIR, f"{model_name}.pkl")
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"[ERROR] 저장된 모델이 없습니다: {path}")
+    return joblib.load(path)
