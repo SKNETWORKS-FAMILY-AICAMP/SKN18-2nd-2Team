@@ -137,3 +137,36 @@ def write_result(results):
                 f"Test Accuracy: {r['test_acc']:.4f}\n"
                 f"Test Macro-F1: {r['test_f1']:.4f}\n\n"
             )
+
+def save_results_plot(results, out_path="./images/model_performance.png"):
+    """
+    모델별 성능(Accuracy)을 비교하는 그래프 저장
+    """
+    models = [r["model"] for r in results]
+    test_acc = [r["test_acc"] for r in results]
+
+    x = range(len(models))
+    bar_width = 0.2
+
+    plt.figure(figsize=(12, 6))
+    
+    # Accuracy
+    accuracy_bar = plt.bar([i - bar_width*0.5 for i in x], test_acc, width=bar_width, label="Test Accuracy")
+
+
+    def add_labels(bars):
+        for bar in bars:
+            height = bar.get_height()
+            plt.text(
+                bar.get_x() + bar.get_width()/2, height + 0.01,  # 위치
+                f"{height:.4f}", ha="center", va="bottom", fontsize=8
+            )
+    add_labels(accuracy_bar)
+
+    plt.xticks(x, models, rotation=45, ha="right")
+    plt.ylabel("Score")
+    plt.title("모델 정확도 비교")
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(out_path)
+    plt.close()
