@@ -16,7 +16,7 @@ ex 기프트 카드를 이용해서 구독했을때 그것이 끝나면 이탈�
 
 
     *** 파일 구조 ***
-- Introduction.py: 메인 페이지(탭/사이드바로 페이지 이동)
-- pages/1. Prediction.py: 1번 기능(이탈 확률 예측)
-- pages/2. Recommendations.py: 2번 기능(프로모션 추천)
-- pages/3. Reasons.py: 3번 기능(이탈 사유 분석)
+- app.py  : 메인 페이지(탭/사이드바로 페이지 이동)
+- pages/1 Prediction.py: 1번 기능(이탈 확률 예측)
+- pages/2 Recommendations.py: 2번 기능(프로모션 추천)
+- pages/3 Reasons.py: 3번 기능(이탈 사유 분석)
