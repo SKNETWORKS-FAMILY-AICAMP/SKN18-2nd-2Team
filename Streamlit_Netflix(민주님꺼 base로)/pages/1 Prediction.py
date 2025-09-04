@@ -27,92 +27,299 @@ df = load_data()
 st.subheader("고객 선택")
 st.write("고객을 선택하세요")
 
-# 고객 선택 방법 탭
-tab1, tab2 = st.tabs(["고객 ID 직접 입력", "고객 목록에서 선택"])
-
 # 세션 상태 초기화
 if 'selected_customer_id' not in st.session_state:
     st.session_state.selected_customer_id = ""
 if 'search_executed' not in st.session_state:
     st.session_state.search_executed = False
+if 'sample_id_selected' not in st.session_state:
+    st.session_state.sample_id_selected = ""
+if 'list_customer_selected' not in st.session_state:
+    st.session_state.list_customer_selected = ""
 
 customer_id_input = ""
 
-with tab1:
-    # 고객 ID 입력 필드와 실행 버튼
-    input_customer_id = st.text_input("CustomerID", 
-                                     placeholder="고객 ID를 입력하세요 (예: a9b75100-82a8-427a-a208-72f24052884a)")
+# 공통 이탈 확률 계산 함수
+def calculate_churn_probability_common(customer):
+    """고객의 특성을 기반으로 이탈 확률을 계산"""
+    base_probability = 40.0  # 기본 확률
     
-    if st.button("고객 정보 조회", type="primary", key="search_button"):
-        if input_customer_id:
-            st.session_state.selected_customer_id = input_customer_id
-            st.session_state.search_executed = True
-        else:
-            st.error("고객 ID를 입력해주세요.")
+    # 나이별 위험도
+    if customer['age'] < 25:
+        base_probability += 15
+    elif customer['age'] > 60:
+        base_probability += 10
+    elif 25 <= customer['age'] <= 40:
+        base_probability -= 5
     
+    # 구독 타입별 위험도
+    if customer['subscription_type'] == 'Basic':
+        base_probability += 20
+    elif customer['subscription_type'] == 'Premium':
+        base_probability -= 15
+    elif customer['subscription_type'] == 'Standard':
+        base_probability += 5
+    
+    # 결제 방법별 위험도
+    if customer['payment_method'] == 'Gift Card':
+        base_probability += 25
+    elif customer['payment_method'] == 'Credit Card':
+        base_probability -= 10
+    elif customer['payment_method'] == 'PayPal':
+        base_probability -= 5
+    
+    # 시청 시간별 위험도
+    if customer['watch_hours'] < 5:
+        base_probability += 20
+    elif customer['watch_hours'] > 20:
+        base_probability -= 15
+    elif customer['watch_hours'] > 10:
+        base_probability -= 5
+    
+    # 마지막 로그인별 위험도
+    if customer['last_login_days'] > 30:
+        base_probability += 25
+    elif customer['last_login_days'] > 14:
+        base_probability += 15
+    elif customer['last_login_days'] < 3:
+        base_probability -= 10
+    
+    # 월 구독료별 위험도
+    if customer['monthly_fee'] < 5:
+        base_probability += 15
+    elif customer['monthly_fee'] > 15:
+        base_probability -= 10
+    
+    # 성별별 위험도 (데이터 기반)
+    if customer['gender'] == 'Female':
+        base_probability += 3
+    elif customer['gender'] == 'Other':
+        base_probability += 5
+    
+    # 디바이스별 위험도
+    if customer['device'] == 'Tablet':
+        base_probability += 8
+    elif customer['device'] == 'Smart TV':
+        base_probability -= 5
+    
+    # 프로필 수별 위험도
+    if customer['number_of_profiles'] == 1:
+        base_probability += 10
+    elif customer['number_of_profiles'] >= 4:
+        base_probability -= 8
+    
+    # 확률을 0-100 범위로 제한
+    base_probability = max(5, min(95, base_probability))
+    
+    return round(base_probability, 1)
 
-with tab2:
-    # 고객 목록에서 선택
-    st.write("**고객 목록에서 선택하세요:**")
+# 상단 간단 예측 결과 표시
+prediction_summary_displayed = False
+
+# 샘플 ID 클릭 결과 표시 (고객 정보 조회 버튼 위)
+if st.session_state.sample_id_selected:
+    sample_customer_data = df[df['customer_id'] == st.session_state.sample_id_selected]
+    if not sample_customer_data.empty:
+        sample_customer = sample_customer_data.iloc[0]
+        
+        st.success(f"✅ 샘플에서 선택된 고객: {st.session_state.sample_id_selected[:20]}...")
+        
+        # 예측 결과 섹션
+        st.subheader("🔍 예측 결과")
+        
+        sample_churn_rate = calculate_churn_probability_common(sample_customer)
+        sample_retention_rate = round(100 - sample_churn_rate, 1)
+        
+        # 메트릭 표시
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("이탈 확률", f"{sample_churn_rate}%")
+        with col2:
+            st.metric("유지 확률", f"{sample_retention_rate}%")
+        
+        prediction_summary_displayed = True
+        st.divider()
+
+# 다른 방법으로 선택된 고객의 간단 예측 결과 (샘플 ID가 없을 때만 표시)
+if not prediction_summary_displayed:
+    current_customer_id = ""
+    selection_method = ""
     
-    # 필터링 옵션
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        churn_filter = st.selectbox("이탈 상태", ["전체", "이탈", "유지"])
-    with col2:
-        subscription_filter = st.selectbox("구독 타입", ["전체", "Basic", "Standard", "Premium"])
-    with col3:
-        gender_filter = st.selectbox("성별", ["전체", "Male", "Female", "Other"])
+    # 우선순위: 직접 입력 > 목록 선택
+    if st.session_state.search_executed and st.session_state.selected_customer_id:
+        current_customer_id = st.session_state.selected_customer_id
+        selection_method = "⌨️ 직접 입력"
+    elif st.session_state.list_customer_selected:
+        current_customer_id = st.session_state.list_customer_selected
+        selection_method = "📝 목록에서 선택"
     
-    # 필터 적용
-    filtered_df = df.copy()
-    
-    if churn_filter == "이탈":
-        filtered_df = filtered_df[filtered_df['churned'] == 1]
-    elif churn_filter == "유지":
-        filtered_df = filtered_df[filtered_df['churned'] == 0]
-    
-    if subscription_filter != "전체":
-        filtered_df = filtered_df[filtered_df['subscription_type'] == subscription_filter]
-    
-    if gender_filter != "전체":
-        filtered_df = filtered_df[filtered_df['gender'] == gender_filter]
-    
-    # 고객 정보를 보기 좋게 표시하기 위한 포맷팅
-    customer_options = []
-    customer_mapping = {}
-    
-    # 최대 100명까지 표시
-    display_df = filtered_df.head(100)
-    
-    if len(display_df) == 0:
-        st.warning("선택한 조건에 맞는 고객이 없습니다.")
-        customer_id_input = ""
+    if current_customer_id:
+        current_customer_data = df[df['customer_id'] == current_customer_id]
+        if not current_customer_data.empty:
+            current_customer = current_customer_data.iloc[0]
+            
+            st.success(f"✅ {selection_method}된 고객: {current_customer_id[:20]}...")
+            
+            # 예측 결과 섹션
+            st.subheader("🔍 예측 결과")
+            
+            current_churn_rate = calculate_churn_probability_common(current_customer)
+            current_retention_rate = round(100 - current_churn_rate, 1)
+            
+            # 메트릭 표시
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("이탈 확률", f"{current_churn_rate}%")
+            with col2:
+                st.metric("유지 확률", f"{current_retention_rate}%")
+            
+            st.divider()
+
+# 고객 ID 직접 입력
+input_customer_id = st.text_input("CustomerID", 
+                                 placeholder="고객 ID를 입력하세요 (예: a9b75100-82a8-427a-a208-72f24052884a)")
+
+if st.button("고객 정보 조회", type="primary", key="search_button"):
+    if input_customer_id:
+        st.session_state.selected_customer_id = input_customer_id
+        st.session_state.search_executed = True
+        st.session_state.sample_id_selected = ""
+        st.session_state.list_customer_selected = ""
+        # st.rerun() 제거 - 버튼 클릭 자체가 페이지를 새로고침함
     else:
-        st.info(f"조건에 맞는 고객 {len(filtered_df)}명 중 {len(display_df)}명을 표시합니다.")
-        
-        for idx, row in display_df.iterrows():
-            display_text = f"{row['customer_id'][:8]}... | {row['age']}세 {row['gender']} | {row['subscription_type']} | {row['region']} | {'이탈' if row['churned'] == 1 else '유지'}"
-            customer_options.append(display_text)
-            customer_mapping[display_text] = row['customer_id']
-        
-        selected_customer_display = st.selectbox(
-            "고객 선택",
-            options=["선택하세요..."] + customer_options,
-            key="customer_selectbox"
-        )
-        
-        if selected_customer_display != "선택하세요...":
-            st.session_state.selected_customer_id = customer_mapping[selected_customer_display]
-            st.session_state.search_executed = True
+        st.error("고객 ID를 입력해주세요.")
 
-# 최종 customer_id_input 설정
+# 사용 가능한 고객 ID 샘플 표시
+with st.expander("사용 가능한 고객 ID 샘플 보기"):
+    st.write("**샘플 고객 ID들:**")
+    
+    # 전체 고객 ID 목록
+    all_customer_ids = df['customer_id'].tolist()
+    total_customers = len(all_customer_ids)
+    
+    # 페이지네이션 설정 (50개씩)
+    items_per_page = 50
+    total_pages = (total_customers - 1) // items_per_page + 1
+    
+    # 페이지 선택
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        current_page = st.selectbox(
+            f"페이지 선택 (총 {total_pages}페이지, {total_customers}개 고객 ID)",
+            range(1, total_pages + 1),
+            key="id_page_selector"
+        )
+    
+    # 현재 페이지의 고객 ID 계산
+    start_idx = (current_page - 1) * items_per_page
+    end_idx = min(start_idx + items_per_page, total_customers)
+    page_customer_ids = all_customer_ids[start_idx:end_idx]
+    
+    st.write(f"**{current_page}페이지 ({start_idx + 1}-{end_idx}번째 고객 ID)**")
+    
+    # 10개씩 한 줄에 표시
+    for i in range(0, len(page_customer_ids), 10):
+        cols = st.columns(10)
+        for j, customer_id in enumerate(page_customer_ids[i:i+10]):
+            with cols[j]:
+                # 고객 ID를 클릭 가능한 버튼으로 만들기
+                button_key = f"id_button_{customer_id}"
+                if st.button(customer_id[:8], key=button_key, help=customer_id):
+                    # 클릭하면 해당 고객 ID로 예측 실행 (샘플 ID 클릭)
+                    if st.session_state.sample_id_selected != customer_id:
+                        st.session_state.sample_id_selected = customer_id
+                        st.session_state.selected_customer_id = ""
+                        st.session_state.list_customer_selected = ""
+                        st.session_state.search_executed = False
+                        st.rerun()  # 페이지 새로고침하여 예측 결과 표시
+
+st.write("**고객 목록에서 선택하세요:**")
+
+# 필터링 옵션
+col1, col2, col3 = st.columns(3)
+with col1:
+    region_filter = st.selectbox("지역", ["전체"] + sorted(df['region'].unique().tolist()))
+with col2:
+    subscription_filter = st.selectbox("구독 타입", ["전체"] + sorted(df['subscription_type'].unique().tolist()))
+with col3:
+    gender_filter = st.selectbox("성별", ["전체"] + sorted(df['gender'].unique().tolist()))
+
+col4, col5, col6 = st.columns(3)
+with col4:
+    device_filter = st.selectbox("디바이스", ["전체"] + sorted(df['device'].unique().tolist()))
+with col5:
+    payment_filter = st.selectbox("결제 방법", ["전체"] + sorted(df['payment_method'].unique().tolist()))
+with col6:
+    genre_filter = st.selectbox("선호 장르", ["전체"] + sorted(df['favorite_genre'].unique().tolist()))
+
+
+# 필터 적용
+filtered_df = df.copy()
+
+if region_filter != "전체":
+    filtered_df = filtered_df[filtered_df['region'] == region_filter]
+
+if subscription_filter != "전체":
+    filtered_df = filtered_df[filtered_df['subscription_type'] == subscription_filter]
+
+if gender_filter != "전체":
+    filtered_df = filtered_df[filtered_df['gender'] == gender_filter]
+
+if device_filter != "전체":
+    filtered_df = filtered_df[filtered_df['device'] == device_filter]
+
+if payment_filter != "전체":
+    filtered_df = filtered_df[filtered_df['payment_method'] == payment_filter]
+
+if genre_filter != "전체":
+    filtered_df = filtered_df[filtered_df['favorite_genre'] == genre_filter]
+
+
+# 고객 정보를 보기 좋게 표시하기 위한 포맷팅
+customer_options = []
+customer_mapping = {}
+
+# 최대 100명까지 표시
+display_df = filtered_df.head(100)
+
+if len(display_df) == 0:
+    st.warning("선택한 조건에 맞는 고객이 없습니다.")
+    customer_id_input = ""
+else:
+    st.info(f"조건에 맞는 고객 {len(filtered_df)}명 중 {len(display_df)}명을 표시합니다.")
+    
+    for idx, row in display_df.iterrows():
+        display_text = f"{row['customer_id'][:8]}... | {row['age']}세 {row['gender']} | {row['subscription_type']} | {row['region']} | {row['device']} | {row['payment_method']} | {row['favorite_genre']}"
+        customer_options.append(display_text)
+        customer_mapping[display_text] = row['customer_id']
+    
+    selected_customer_display = st.selectbox(
+        "고객 선택",
+        options=["선택하세요..."] + customer_options,
+        key="customer_selectbox"
+    )
+    
+    if selected_customer_display != "선택하세요...":
+        # 이전에 선택된 고객과 다른 경우에만 상태 업데이트
+        selected_id = customer_mapping[selected_customer_display]
+        if st.session_state.list_customer_selected != selected_id:
+            st.session_state.list_customer_selected = selected_id
+            st.session_state.selected_customer_id = ""
+            st.session_state.search_executed = False
+            # 목록에서 선택했을 때는 샘플 ID도 초기화하여 새로운 선택이 위에 반영되도록 함
+            st.session_state.sample_id_selected = ""
+
+# 직접 입력, 샘플 ID 선택, 또는 고객 목록 선택 결과 처리
 if st.session_state.search_executed and st.session_state.selected_customer_id:
     customer_id_input = st.session_state.selected_customer_id
+elif st.session_state.sample_id_selected:
+    customer_id_input = st.session_state.sample_id_selected  # 샘플 ID도 아래에 상세 표시
+elif st.session_state.list_customer_selected:
+    customer_id_input = st.session_state.list_customer_selected
 else:
     customer_id_input = ""
 
-# 고객 ID가 입력되었을 때 해당 고객 정보 표시
+# 선택된 고객 정보 표시 (아래쪽 - 상세)
 if customer_id_input:
     # 입력된 고객 ID로 고객 찾기
     customer_data = df[df['customer_id'] == customer_id_input]
@@ -120,84 +327,19 @@ if customer_id_input:
     if not customer_data.empty:
         customer = customer_data.iloc[0]
         
+        # 선택 방법에 따른 제목 표시
+        if st.session_state.sample_id_selected and customer_id_input == st.session_state.sample_id_selected:
+            st.info(f"📋 샘플 ID에서 선택된 고객: {customer_id_input[:20]}...")
+        elif st.session_state.list_customer_selected and customer_id_input == st.session_state.list_customer_selected:
+            st.info(f"📝 목록에서 선택된 고객: {customer_id_input[:20]}...")
+        elif st.session_state.selected_customer_id and customer_id_input == st.session_state.selected_customer_id:
+            st.info(f"⌨️ 직접 입력된 고객: {customer_id_input[:20]}...")
+        
         # 예측 결과 섹션
-        st.subheader("예측 결과")
+        st.subheader("📊 상세 예측 결과")
         
-        # 고객 특성 기반 이탈 확률 계산
-        def calculate_churn_probability(customer):
-            """고객의 특성을 기반으로 이탈 확률을 계산"""
-            base_probability = 40.0  # 기본 확률
-            
-            # 나이별 위험도
-            if customer['age'] < 25:
-                base_probability += 15
-            elif customer['age'] > 60:
-                base_probability += 10
-            elif 25 <= customer['age'] <= 40:
-                base_probability -= 5
-            
-            # 구독 타입별 위험도
-            if customer['subscription_type'] == 'Basic':
-                base_probability += 20
-            elif customer['subscription_type'] == 'Premium':
-                base_probability -= 15
-            elif customer['subscription_type'] == 'Standard':
-                base_probability += 5
-            
-            # 결제 방법별 위험도
-            if customer['payment_method'] == 'Gift Card':
-                base_probability += 25
-            elif customer['payment_method'] == 'Credit Card':
-                base_probability -= 10
-            elif customer['payment_method'] == 'PayPal':
-                base_probability -= 5
-            
-            # 시청 시간별 위험도
-            if customer['watch_hours'] < 5:
-                base_probability += 20
-            elif customer['watch_hours'] > 20:
-                base_probability -= 15
-            elif customer['watch_hours'] > 10:
-                base_probability -= 5
-            
-            # 마지막 로그인별 위험도
-            if customer['last_login_days'] > 30:
-                base_probability += 25
-            elif customer['last_login_days'] > 14:
-                base_probability += 15
-            elif customer['last_login_days'] < 3:
-                base_probability -= 10
-            
-            # 월 구독료별 위험도
-            if customer['monthly_fee'] < 5:
-                base_probability += 15
-            elif customer['monthly_fee'] > 15:
-                base_probability -= 10
-            
-            # 성별별 위험도 (데이터 기반)
-            if customer['gender'] == 'Female':
-                base_probability += 3
-            elif customer['gender'] == 'Other':
-                base_probability += 5
-            
-            # 디바이스별 위험도
-            if customer['device'] == 'Tablet':
-                base_probability += 8
-            elif customer['device'] == 'Smart TV':
-                base_probability -= 5
-            
-            # 프로필 수별 위험도
-            if customer['number_of_profiles'] == 1:
-                base_probability += 10
-            elif customer['number_of_profiles'] >= 4:
-                base_probability -= 8
-            
-            # 확률을 0-100 범위로 제한
-            base_probability = max(5, min(95, base_probability))
-            
-            return round(base_probability, 1)
-        
-        churn_rate = calculate_churn_probability(customer)
+        # 공통 함수를 사용하여 이탈 확률 계산
+        churn_rate = calculate_churn_probability_common(customer)
         retention_rate = round(100 - churn_rate, 1)
         
         # 메트릭 표시
@@ -381,48 +523,6 @@ if customer_id_input:
         st.error("해당 고객 ID를 찾을 수 없습니다. 올바른 고객 ID를 입력해주세요.")
 
 
-
-
-# 사용 가능한 고객 ID 샘플 표시
-with st.expander("사용 가능한 고객 ID 샘플 보기"):
-    st.write("**샘플 고객 ID들:**")
-    
-    # 전체 고객 ID 목록
-    all_customer_ids = df['customer_id'].tolist()
-    total_customers = len(all_customer_ids)
-    
-    # 페이지네이션 설정 (50개씩)
-    items_per_page = 50
-    total_pages = (total_customers - 1) // items_per_page + 1
-    
-    # 페이지 선택
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        current_page = st.selectbox(
-            f"페이지 선택 (총 {total_pages}페이지, {total_customers}개 고객 ID)",
-            range(1, total_pages + 1),
-            key="id_page_selector"
-        )
-    
-    # 현재 페이지의 고객 ID 계산
-    start_idx = (current_page - 1) * items_per_page
-    end_idx = min(start_idx + items_per_page, total_customers)
-    page_customer_ids = all_customer_ids[start_idx:end_idx]
-    
-    st.write(f"**{current_page}페이지 ({start_idx + 1}-{end_idx}번째 고객 ID)**")
-    
-    # 10개씩 한 줄에 표시
-    for i in range(0, len(page_customer_ids), 10):
-        cols = st.columns(10)
-        for j, customer_id in enumerate(page_customer_ids[i:i+10]):
-            with cols[j]:
-                # 고객 ID를 클릭 가능한 버튼으로 만들기
-                button_key = f"id_button_{customer_id}"
-                if st.button(customer_id[:8], key=button_key, help=customer_id):
-                    # 클릭하면 해당 고객 ID로 예측 실행
-                    st.session_state.selected_customer_id = customer_id
-                    st.session_state.search_executed = True
-                    st.rerun()  # 페이지 새로고침하여 예측 결과 표시
 
 
 #################
