@@ -15,6 +15,8 @@ import random
 #     - 예측 결과에 따른 주요 이탈 행동요인을 텍스트 혹은 그래프로 표시
 
 st.title("🔎고객 이탈 확률 예측🔎")
+st.write("")
+st.write("")
 st.subheader("1️⃣ 버튼을 누르면 랜덤으로 고객을 지정합니다.")
 
 # 예시 고객 데이터
@@ -35,6 +37,10 @@ if st.button("랜덤 고객 뽑기"):
     st.bar_chart({"이탈 확률": [prob], "잔존 확률": [1-prob]})
     st.write("이탈 사유 예시: 기프트카드 만료")
 
+st.write("")
+st.write("")
+st.divider()
+
 
 # 직접 고객을 선택할 경우
 st.subheader("2️⃣ 고객을 직접 입력하여 조회해보세요.")
@@ -54,7 +60,17 @@ with st.form("predict_form"):
 #################
 # Side Bar 설정 #
 #################
-# 각각의 페이지로 넘어가도록 연결하기
+
+# 기본 sidebar 없애기
+st.markdown("""
+    <style>
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    [data-testid="stSidebarNav"] {display: none;}
+    </style>
+    """, unsafe_allow_html=True)
+
+# sidebar에 각각의 페이지로 넘어가도록 연결하기
 st.sidebar.header("🚀페이지 이동🚀")
 st.sidebar.page_link("app.py", label="📍기본 페이지📍")
 st.sidebar.page_link("pages/1 Prediction.py", label="🔎고객 이탈 확률 예측🔎")

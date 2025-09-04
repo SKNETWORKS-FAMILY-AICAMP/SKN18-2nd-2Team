@@ -8,10 +8,9 @@ import pandas as pd
 #   - 고객별 이탈에 영향을 준 주요 피처를 그래프로 시각화
 #   - 이탈 가능성이 높은 이유를 시사하기
 
-
-
 st.title("📊이탈 사유 분석📊")
-
+st.write("")
+st.write("")
 
 customers = pd.DataFrame([
     {"이름": "홍길동", "주요 이탈 사유": "기프트카드 만료", "영향도": 0.7},
@@ -21,15 +20,23 @@ customers = pd.DataFrame([
 
 st.subheader("📜고객별 이탈 사유")
 st.dataframe(customers[["이름", "주요 이탈 사유", "영향도"]])
-
+st.write("")
+st.write("")
+st.divider()
 st.subheader("📈이탈 사유별 영향도 시각화")
 st.bar_chart(customers.set_index("이름")["영향도"])
 
 
-#################
-# Side Bar 설정 #
-#################
-# 각각의 페이지로 넘어가도록 연결하기
+# 기본 sidebar 없애기
+st.markdown("""
+    <style>
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    [data-testid="stSidebarNav"] {display: none;}
+    </style>
+    """, unsafe_allow_html=True)
+
+# sidebar에 각각의 페이지로 넘어가도록 연결하기
 st.sidebar.header("🚀페이지 이동🚀")
 st.sidebar.page_link("app.py", label="📍기본 페이지📍")
 st.sidebar.page_link("pages/1 Prediction.py", label="🔎고객 이탈 확률 예측🔎")

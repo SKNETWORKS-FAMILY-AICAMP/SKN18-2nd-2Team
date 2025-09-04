@@ -11,11 +11,11 @@ import pandas as pd
 #     - 각 고객별로 맞춤형 프로모션을 추천 
 #     ex) 할인, 기프트카드 등등
 
-
-
 st.title("🪄프로모션 추천🪄")
+st.write("")
+st.write("")
 
-# 예시: 실제 데이터 파일이 있다면 아래처럼 불러올 수 있습니다.
+# 예시: 실제 데이터 파일이 있다면 아래처럼
 # customers = pd.read_csv("data/customers.csv")
 customers = pd.DataFrame([
     {"이름": "홍길동", "이탈확률": 0.85, "추천 프로모션": "10% 할인"},
@@ -26,14 +26,19 @@ customers = pd.DataFrame([
 high_risk = customers[customers["이탈확률"] > 0.5]
 st.subheader("👥이탈 가능성 높은 고객 목록")
 st.dataframe(high_risk[["이름", "이탈확률", "추천 프로모션"]])
-
 st.write("고객별 맞춤 프로모션을 추천합니다.")
 
 
-#################
-# Side Bar 설정 #
-#################
-# sicebar에 각각의 페이지로 넘어가도록 연결하기
+# 기본 sidebar 없애기
+st.markdown("""
+    <style>
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    [data-testid="stSidebarNav"] {display: none;}
+    </style>
+    """, unsafe_allow_html=True)
+
+# sidebar에 각각의 페이지로 넘어가도록 연결하기
 st.sidebar.header("🚀페이지 이동🚀")
 st.sidebar.page_link("app.py", label="📍기본 페이지📍")
 st.sidebar.page_link("pages/1 Prediction.py", label="🔎고객 이탈 확률 예측🔎")
