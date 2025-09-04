@@ -170,3 +170,4 @@ def save_results_plot(results, out_path="./images/model_performance.png"):
     plt.tight_layout()
     plt.savefig(out_path)
     plt.close()
+
