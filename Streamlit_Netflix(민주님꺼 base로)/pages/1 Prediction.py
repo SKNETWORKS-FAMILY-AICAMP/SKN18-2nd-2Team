@@ -123,10 +123,82 @@ if customer_id_input:
         # 예측 결과 섹션
         st.subheader("예측 결과")
         
-        # 실제 이탈 여부를 백분율로 표시
-        actual_churn = customer['churned']
-        churn_rate = 61.7 if actual_churn == 1 else 38.3  # 실제 데이터 기반 표시
-        retention_rate = 100 - churn_rate
+        # 고객 특성 기반 이탈 확률 계산
+        def calculate_churn_probability(customer):
+            """고객의 특성을 기반으로 이탈 확률을 계산"""
+            base_probability = 40.0  # 기본 확률
+            
+            # 나이별 위험도
+            if customer['age'] < 25:
+                base_probability += 15
+            elif customer['age'] > 60:
+                base_probability += 10
+            elif 25 <= customer['age'] <= 40:
+                base_probability -= 5
+            
+            # 구독 타입별 위험도
+            if customer['subscription_type'] == 'Basic':
+                base_probability += 20
+            elif customer['subscription_type'] == 'Premium':
+                base_probability -= 15
+            elif customer['subscription_type'] == 'Standard':
+                base_probability += 5
+            
+            # 결제 방법별 위험도
+            if customer['payment_method'] == 'Gift Card':
+                base_probability += 25
+            elif customer['payment_method'] == 'Credit Card':
+                base_probability -= 10
+            elif customer['payment_method'] == 'PayPal':
+                base_probability -= 5
+            
+            # 시청 시간별 위험도
+            if customer['watch_hours'] < 5:
+                base_probability += 20
+            elif customer['watch_hours'] > 20:
+                base_probability -= 15
+            elif customer['watch_hours'] > 10:
+                base_probability -= 5
+            
+            # 마지막 로그인별 위험도
+            if customer['last_login_days'] > 30:
+                base_probability += 25
+            elif customer['last_login_days'] > 14:
+                base_probability += 15
+            elif customer['last_login_days'] < 3:
+                base_probability -= 10
+            
+            # 월 구독료별 위험도
+            if customer['monthly_fee'] < 5:
+                base_probability += 15
+            elif customer['monthly_fee'] > 15:
+                base_probability -= 10
+            
+            # 성별별 위험도 (데이터 기반)
+            if customer['gender'] == 'Female':
+                base_probability += 3
+            elif customer['gender'] == 'Other':
+                base_probability += 5
+            
+            # 디바이스별 위험도
+            if customer['device'] == 'Tablet':
+                base_probability += 8
+            elif customer['device'] == 'Smart TV':
+                base_probability -= 5
+            
+            # 프로필 수별 위험도
+            if customer['number_of_profiles'] == 1:
+                base_probability += 10
+            elif customer['number_of_profiles'] >= 4:
+                base_probability -= 8
+            
+            # 확률을 0-100 범위로 제한
+            base_probability = max(5, min(95, base_probability))
+            
+            return round(base_probability, 1)
+        
+        churn_rate = calculate_churn_probability(customer)
+        retention_rate = round(100 - churn_rate, 1)
         
         # 메트릭 표시
         col1, col2 = st.columns(2)
@@ -138,51 +210,79 @@ if customer_id_input:
         # 이탈/유지 확률 차트
         st.subheader("이탈/유지 확률")
         
+        # 위험도에 따른 동적 색상 설정
+        if churn_rate >= 70:
+            churn_color = "#DC143C"  # 진한 빨간색 (매우 위험)
+            risk_emoji = "🔴"
+        elif churn_rate >= 50:
+            churn_color = "#FF4500"  # 주황빨간색 (높은 위험)
+            risk_emoji = "🟠"
+        elif churn_rate >= 30:
+            churn_color = "#FF6347"  # 토마토색 (보통 위험)
+            risk_emoji = "🟡"
+        else:
+            churn_color = "#32CD32"  # 라임그린 (낮은 위험)
+            risk_emoji = "🟢"
+        
         # 색상으로 구분된 차트 (CSS 스타일 사용)
-        st.markdown("""
+        st.markdown(f"""
         <style>
-        .churn-bar {
-            background-color: #FF4B4B;
+        .churn-bar {{
+            background-color: {churn_color};
             color: white;
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 5px;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
             text-align: center;
             font-weight: bold;
-        }
-        .retention-bar {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }}
+        .retention-bar {{
             background-color: #1f77b4;
             color: white;
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 5px;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
             text-align: center;
             font-weight: bold;
-        }
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }}
+        .probability-container {{
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }}
         </style>
         """, unsafe_allow_html=True)
         
-        # 이탈 확률 바
-        churn_width = int(churn_rate)
+        # 확률 표시 컨테이너
+        st.markdown('<div class="probability-container">', unsafe_allow_html=True)
+        
+        # 이탈 확률 바 (동적 크기)
+        churn_width = max(80, int(churn_rate * 4))  # 최소 80px, 최대 380px
         st.markdown(f"""
-        <div style="display: flex; align-items: center; margin: 10px 0;">
-            <div style="width: 80px; font-weight: bold;">이탈:</div>
-            <div class="churn-bar" style="width: {churn_width * 3}px; min-width: 100px;">
+        <div style="display: flex; align-items: center; margin: 15px 0;">
+            <div style="width: 100px; font-weight: bold; font-size: 16px;">{risk_emoji} 이탈:</div>
+            <div class="churn-bar" style="width: {churn_width}px; min-width: 100px;">
                 {churn_rate}%
             </div>
         </div>
         """, unsafe_allow_html=True)
         
-        # 유지 확률 바
-        retention_width = int(retention_rate)
+        # 유지 확률 바 (동적 크기)
+        retention_width = max(80, int(retention_rate * 4))  # 최소 80px, 최대 380px
         st.markdown(f"""
-        <div style="display: flex; align-items: center; margin: 10px 0;">
-            <div style="width: 80px; font-weight: bold;">유지:</div>
-            <div class="retention-bar" style="width: {retention_width * 3}px; min-width: 100px;">
+        <div style="display: flex; align-items: center; margin: 15px 0;">
+            <div style="width: 100px; font-weight: bold; font-size: 16px;">✅ 유지:</div>
+            <div class="retention-bar" style="width: {retention_width}px; min-width: 100px;">
                 {retention_rate}%
             </div>
         </div>
         """, unsafe_allow_html=True)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
         
         # 상세 고객 정보 (접힌 형태로)
         with st.expander("상세 고객 정보 보기"):
@@ -205,16 +305,77 @@ if customer_id_input:
                 st.write(f"**선호 장르:** {customer['favorite_genre']}")
         
         # 이탈 위험 요소 분석
+        st.subheader("🚨 주요 위험 요소 분석")
+        
         risk_factors = []
+        protection_factors = []
+        
+        # 위험 요소 분석
         if customer['payment_method'] == 'Gift Card':
             risk_factors.append("기프트카드 결제 (만료 위험)")
-        if customer['last_login_days'] > 20:
-            risk_factors.append("장기간 미접속")
+        if customer['last_login_days'] > 30:
+            risk_factors.append("30일 이상 미접속 (매우 높은 위험)")
+        elif customer['last_login_days'] > 14:
+            risk_factors.append("14일 이상 미접속 (높은 위험)")
         if customer['watch_hours'] < 5:
-            risk_factors.append("낮은 시청 시간")
-            
+            risk_factors.append("낮은 시청 시간 (월 5시간 미만)")
+        if customer['age'] < 25:
+            risk_factors.append("젊은 연령층 (변동성 높음)")
+        elif customer['age'] > 60:
+            risk_factors.append("고령층 (기술 적응 어려움)")
+        if customer['subscription_type'] == 'Basic':
+            risk_factors.append("기본 요금제 (기능 제한)")
+        if customer['monthly_fee'] < 5:
+            risk_factors.append("낮은 구독료 (가치 인식 부족)")
+        if customer['device'] == 'Tablet':
+            risk_factors.append("태블릿 사용 (불편한 시청 환경)")
+        if customer['number_of_profiles'] == 1:
+            risk_factors.append("단일 프로필 (가족 공유 미활용)")
+        
+        # 보호 요소 분석
+        if customer['subscription_type'] == 'Premium':
+            protection_factors.append("프리미엄 구독 (높은 만족도)")
+        if customer['watch_hours'] > 20:
+            protection_factors.append("높은 시청 시간 (적극적 이용)")
+        elif customer['watch_hours'] > 10:
+            protection_factors.append("적정 시청 시간 (안정적 이용)")
+        if customer['last_login_days'] < 3:
+            protection_factors.append("최근 접속 (활발한 이용)")
+        if customer['payment_method'] == 'Credit Card':
+            protection_factors.append("신용카드 결제 (안정적 결제)")
+        if 25 <= customer['age'] <= 40:
+            protection_factors.append("핵심 연령층 (안정적 이용 패턴)")
+        if customer['device'] == 'Smart TV':
+            protection_factors.append("스마트 TV 이용 (편리한 시청 환경)")
+        if customer['number_of_profiles'] >= 4:
+            protection_factors.append("다중 프로필 (가족 공유 활용)")
+        if customer['monthly_fee'] > 15:
+            protection_factors.append("높은 구독료 (서비스 가치 인정)")
+        
+        # 위험 요소 표시
         if risk_factors:
-            st.info("💡 " + "실제 고객의 상세 정보나 " + "고객 상세 정보 페이지에서 확인할 수 있습니다.")
+            st.error("🚨 **위험 요소**")
+            for factor in risk_factors:
+                st.write(f"• {factor}")
+        
+        # 보호 요소 표시
+        if protection_factors:
+            st.success("✅ **보호 요소**")
+            for factor in protection_factors:
+                st.write(f"• {factor}")
+        
+        # 종합 위험도 평가
+        risk_level = ""
+        if churn_rate >= 70:
+            risk_level = "🔴 **매우 높음** - 즉시 대응 필요"
+        elif churn_rate >= 50:
+            risk_level = "🟠 **높음** - 적극적 관리 필요"
+        elif churn_rate >= 30:
+            risk_level = "🟡 **보통** - 주기적 모니터링 필요"
+        else:
+            risk_level = "🟢 **낮음** - 안정적 고객"
+        
+        st.info(f"**종합 위험도:** {risk_level}")
         
     else:
         st.error("해당 고객 ID를 찾을 수 없습니다. 올바른 고객 ID를 입력해주세요.")
@@ -224,10 +385,44 @@ if customer_id_input:
 
 # 사용 가능한 고객 ID 샘플 표시
 with st.expander("사용 가능한 고객 ID 샘플 보기"):
-    sample_customers = df.head(10)['customer_id'].tolist()
     st.write("**샘플 고객 ID들:**")
-    for i, customer_id in enumerate(sample_customers, 1):
-        st.code(customer_id)
+    
+    # 전체 고객 ID 목록
+    all_customer_ids = df['customer_id'].tolist()
+    total_customers = len(all_customer_ids)
+    
+    # 페이지네이션 설정 (50개씩)
+    items_per_page = 50
+    total_pages = (total_customers - 1) // items_per_page + 1
+    
+    # 페이지 선택
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        current_page = st.selectbox(
+            f"페이지 선택 (총 {total_pages}페이지, {total_customers}개 고객 ID)",
+            range(1, total_pages + 1),
+            key="id_page_selector"
+        )
+    
+    # 현재 페이지의 고객 ID 계산
+    start_idx = (current_page - 1) * items_per_page
+    end_idx = min(start_idx + items_per_page, total_customers)
+    page_customer_ids = all_customer_ids[start_idx:end_idx]
+    
+    st.write(f"**{current_page}페이지 ({start_idx + 1}-{end_idx}번째 고객 ID)**")
+    
+    # 10개씩 한 줄에 표시
+    for i in range(0, len(page_customer_ids), 10):
+        cols = st.columns(10)
+        for j, customer_id in enumerate(page_customer_ids[i:i+10]):
+            with cols[j]:
+                # 고객 ID를 클릭 가능한 버튼으로 만들기
+                button_key = f"id_button_{customer_id}"
+                if st.button(customer_id[:8], key=button_key, help=customer_id):
+                    # 클릭하면 해당 고객 ID로 예측 실행
+                    st.session_state.selected_customer_id = customer_id
+                    st.session_state.search_executed = True
+                    st.rerun()  # 페이지 새로고침하여 예측 결과 표시
 
 
 #################
