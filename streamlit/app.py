@@ -1,94 +1,233 @@
 import streamlit as st
 import base64
+import time
+from PIL import Image
+from streamlit_card import card
+from sidebar_utils import setup_shared_sidebar
 
 #####################
 # 메인페이지 만들기 #
 #####################
-# 최상단에 netflix 로고 이미지 삽입
-st.image("Logonetflix.png", width=1500) 
-st.title("˙⋆✮🎥고객 이탈 예측 서비스🍿✮⋆˙")
-
-centered_text = """
-<div style="text-align: center;">
-🔎이 서비스는 고객 데이터를 기반으로 이탈 확률을 예측하고<br>
-🪄이탈 가능성이 높은 고객에게 맞춤 프로모션을 추천하며<br>
-📊고객별 이탈 사유를 분석해 시각화합니다.
-</div>
-"""
-
-st.markdown(centered_text, unsafe_allow_html=True)
-st.write("")
-st.write("")
-st.write("")
 
 
+# --- 페이지 설정 ---
+def set_page():
+    # 최상단에 netflix 로고 이미지 삽입
+    st.image(".\images\Logonetflix.png", width=2000) 
+    st.title("˙⋆✮🎥고객 이탈 예측 서비스🍿✮⋆˙")
+
+    centered_text = """
+    <div style="text-align: center;">
+    🔎이 서비스는 고객 데이터를 기반으로 이탈 확률을 예측하고<br>
+    🪄이탈 가능성이 높은 고객에게 맞춤 프로모션을 추천하며<br>
+    📊고객별 이탈 사유를 분석해 시각화합니다.
+    </div>
+    """
+    st.markdown(centered_text, unsafe_allow_html=True)
+    st.write("")
+    st.write("")
+    st.write("")
+
+    st.set_page_config(
+        page_title="Streamlit Netflix Profiles",
+        layout="centered"
+    )
 
 
-# 기본 sidebar 없애기
 st.markdown("""
     <style>
-    footer {visibility: hidden;}
-    [data-testid="stMainMenu"] {visibility: hidden;}
-    [data-testid="stSidebarNav"] {display: none;}
+        /* 전체 배경을 어둡게 설정 */
+        .main {
+            background-color: #141414;
+            color: white;
+        }
+        /* 프로필 선택 제목 스타일 */
+        h1 {
+            text-align: center;
+            color: white;
+            font-weight: bold;
+        }
+        /* 프로필 관리 버튼 스타일 */
+        .stButton>button {
+            display: block;
+            margin: 0 auto;
+            border: 1px solid white;
+            background-color: transparent;
+            color: grey;
+            padding: 10px 20px;
+            border-radius: 0;
+            font-size: 16px;
+        }
+        .stButton>button:hover {
+            border-color: white;
+            color: white;
+        }
+        
+        /* 사이드바 배경색 설정 */
+        [data-testid="stSidebar"] {
+            background-color: #0E1117;
+        }
+
+        /* 메인 바탕화면 배경색 설정 */
+        .main {
+            background-color: #0E1117;
+        }
+        
+        /* 기본 sidebar 없애기 */
+        [data-testid="stSidebarNav"] {display: none;}
+        
+        /* 오디오 플레이어 숨기기 */
+        audio {
+            display: none;
+        }
     </style>
     """, unsafe_allow_html=True)
 
 
-# sidebar에 각각의 페이지로 넘어가도록 연결하기
-st.sidebar.header("🚀페이지 이동🚀")
-st.sidebar.page_link("app.py", label="📍기본 페이지📍")
-st.sidebar.page_link("pages/1 Prediction.py", label="🔎고객 이탈 확률 예측🔎")
-st.sidebar.page_link("pages/2 Recommendations.py", label="🪄프로모션 추천🪄")
-st.sidebar.page_link("pages/3 Reasons.py", label="📊이탈 사유 분석📊")
-st.sidebar.success("🙋🏻버튼을 클릭하여 원하는 기능을 사용해보세요!💁🏻‍♀️")
 
-# 지금 뜨는 콘텐츠
-content_data = [
-    {"img": "https://occ-0-988-325.1.nflxso.net/dnm/api/v6/mAcAr9TxZIVbINe88xb3Teg5_OA/AAAABQBYUL3Qpm0ZLhYDdmy2GUNsQBOPSLfduvgfWwxxRSzUlEL81tG9HwzUSL0y-4vdcDDl1hUKmd31OvOZHPDdjy9lbhpMIxgvHikM8056iSoEGxSOoEYCvqqX0wb23gxnz2Bu.webp?r=ff7", "title": "케이팝 데몬 헌터스"},
-    {"img": "https://occ-0-988-325.1.nflxso.net/dnm/api/v6/mAcAr9TxZIVbINe88xb3Teg5_OA/AAAABR5J80TeGdGhsKAcYwKdzusc4_kifLk_yiSVrYKNC4RMt4n2Bkr136690q5kaQwOqHM9RZducCy7hqWP4RUPmnTC6QM39d6Ta0oFzK3Ln1Bx4C0cf3NQir9S4vmjB-pLzqxD.webp?r=05e", "title": "애마"},
-    {"img": "https://occ-0-988-325.1.nflxso.net/dnm/api/v6/mAcAr9TxZIVbINe88xb3Teg5_OA/AAAABe6acOVBzNkmGSQvFspkyVWfbo1raPZkUhsH9_exmg26UAFAfjXPNkUAw4NTERSzA_E3CN6Z0oJLH2I_9vX_bBuxeohH0UuCjQu5AjyBPXIBa4HwVusgIhuK3XQ9Gs5NAFkO.webp?r=4b2", "title": "트리거"},
-    {"img": "https://occ-0-988-325.1.nflxso.net/dnm/api/v6/mAcAr9TxZIVbINe88xb3Teg5_OA/AAAABVuAvVIHv5vvI0r939iO_TvF0XM0jbvfnUzZC4z1aTOGckTOHDdLxqk0NeWsffNtpXNcmIMQQT1uJnOey5dmtQz1yuNtLt9OmzQ.webp?r=7f4", "title": "폭군의 셰프"},
-    {"img": "https://occ-0-988-325.1.nflxso.net/dnm/api/v6/mAcAr9TxZIVbINe88xb3Teg5_OA/AAAABUDIsOkh8w9Oyt2Ywuhp_3ReATSDDzyXcnCoLUeLK023NqIUcvu9r3qT9FAjxlaz5ew-J5c1gS1QwlxP84TVN8DBOjS6xhmU1as7s449deddH_w_bb8WC5ytfD-zMIg4Z3yR.webp?r=8d8", "title": "나는 생존자다"},
-    {"img": "https://occ-0-988-325.1.nflxso.net/dnm/api/v6/mAcAr9TxZIVbINe88xb3Teg5_OA/AAAABcv94NKVHP5EqETcbS317GF0i4A-6Z0jfFWqaLdsnKzHrygXSYgbLAgYhOKWkPeGt3ertTWI0DAGKL4oKc5loLpea6sKB9MvFGTJstNmdpceLnMv7MeghyA22aNZsAEw54E0.webp?r=4ca", "title": "고백의 역사"},
-    {"img": "https://occ-0-988-325.1.nflxso.net/dnm/api/v6/mAcAr9TxZIVbINe88xb3Teg5_OA/AAAABWTM77d-Us_-_iFkO9XPjG4WfAIUfrhobEsDDcTZ7Zs5WnsKMa4fN9DwTikl4gupBjm77GL8GhajKr4KD8UeMe4A3rwifeqkX8N9gIJFzEH6Rs6ClCjdQp4oRBxa2d3r_q1i.webp?r=3ab", "title": "폭싹 속았수다"},
+def login_button():
+    # 기본값: 로그아웃
+    if 'login' not in st.session_state:
+        st.session_state.login = False
+
+# 사이드바 로그인/로그아웃 
+    with st.sidebar:
+        if st.session_state.login:
+            # 로그인이 된 경우
+            st.header("코딩좋아 ㅎㅎ 님 반갑습니다.")
+            if st.button("Logout"):
+                st.session_state.login = False
+                st.rerun() # 페이지 새로고침
+        else:
+            # 로그인이 안 된 경우
+            st.header("로그인이 필요합니다.")
+            if st.button("Login"):
+                st.session_state.login = True
+                st.rerun() # 페이지 새로고침
+
+
+
+def after_login():
+    # 넷플릭스 프로필 설정
+    profiles = [
+        {"name": "안시현", "avatar": "https://i.pinimg.com/474x/e3/94/30/e39430434d2b8207188f880ac66c6411.jpg", "info": "팀장님"},
+        {"name": "김규리", "avatar": "https://i.pinimg.com/564x/1b/a2/e6/1ba2e6d1d4874546c70c91f1024e17fb.jpg", "info": "팀장님"},
+        {"name": "김민주", "avatar": "https://wallpapers.com/images/hd/netflix-profile-pictures-1000-x-1000-dyrp6bw6adbulg5b.jpg", "info": "팀장님"},
+        {"name": "김주석", "avatar": "https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png", "info": "팀장님"},
+        {"name": "최준호", "avatar": "https://wallpapers.com/images/hd/netflix-profile-pictures-1000-x-1000-88wkdmjrorckekha.jpg", "info": "팀장님"},
+    ]
+    # 로그인 상태일 경우 프로필 선택 창이 나타남
+    if st.session_state.login:
+        
+        st.subheader("예측 서비스를 이용할 프로필을 선택하세요.")
+        st.write("")
+        st.write("")
+
+        cols = st.columns(len(profiles))
+
+        for i, profile in enumerate(profiles):
+            with cols[i]:
+                clicked = card(
+                    title=profile["name"],
+                    text="",
+                    image=profile["avatar"],
+                    styles={
+                        "card": {
+                            "width": "130px",
+                            "height": "130px",
+                            "border-radius": "8px",
+                            "margin": "0 auto",
+                            "background-color": "#E50914"
+                        },
+                        "image": { "object-fit": "cover", "height": "100%" }
+                    },
+                    on_click=lambda: st.info(profile["info"]) 
+                )
+
+        st.write("")
+        st.write("")
+        st.button("프로필 관리")
+
+    else:
+        # --- 5. 로그인이 False일 때 안내 메시지를 보여줌 ---
+        st.warning("서비스를 이용하려면 사이드바에서 먼저 로그인해주세요.")
+
+
+
+# 광고창 
+def ad():
+    ad_list = [
+        {"image": "./images/말차라떼 머셔~.png", "text": "쌉사름하고 진한 말차의 향을 그대로!"},
+        {"image": "./images/바나나라떼 머셔~.png", "text": "당 떨어질 땐? 밍그래 머셔~"},
+        {"image": "./images/소주 머셔~.png", "text": "이모 청이슬 하나요."}
 ]
+    # 사이드바에 이미지 순차 출력
+    with st.sidebar:
+        image_placeholder = st.empty()
+    
+    # 이미지 순환
+    current_index = 0
+    st.sidebar.write("광고문의: 02-9965-4668")
+    while True:
+        if ad_list:
+            try:
+                current_ad = ad_list[current_index]
+                image = Image.open(current_ad["image"])
+                
+                with image_placeholder.container():
+                    st.write(f"**{current_ad['text']}**")
+                    st.image(image, width='stretch')
+                
+                current_index = (current_index + 1) % len(ad_list)
+            except:
+                pass
+        time.sleep(2)  # 2초마다 변경
 
-st.header("지금 뜨는 콘텐츠")
-cols = st.columns(7)
 
-for i, item in enumerate(content_data):
-    with cols[i]:
-        st.image(item["img"])
-        st.markdown(f"**{i+1}. {item['title']}**")
+def set_sidebar():
+    # 기본 sidebar 없애기
+    st.markdown("""
+        <style>
+        footer {visibility: hidden;}
+        header {visibility: hidden;}
+        [data-testid="stSidebarNav"] {display: none;}
+        </style>
+        """, unsafe_allow_html=True)
+
+    # 각각의 페이지로 넘어가도록 연결하기
+    st.sidebar.subheader("🚀페이지 이동🚀")
+    st.sidebar.page_link("app.py", label="📍기본 페이지")
+    st.sidebar.page_link("pages/1 Prediction.py", label="🔎고객 이탈 확률 예측")
+    st.sidebar.page_link("pages/2 Recommendations.py", label="🪄프로모션 추천")
+    st.sidebar.page_link("pages/3 Reasons.py", label="📊이탈 사유 분석")
+    st.sidebar.success("🙋🏻버튼을 클릭하여 원하는 기능을 사용해보세요!💁🏻‍♀️")
 
 
-
-
-
-
-# app를 실행했을 때 넷플릭스 효과음 재생
-# 자동 실행시키기 위해서 소리허용 설정 필요
-audio_file = open('audio_netflix.mp3', 'rb')
-st.audio(audio_file.read(), format='audio/mp3')
-
-# --- HIDE THE AUDIO PLAYER UI ---
-# Use CSS to make the audio player invisible
-hide_player_css = """
-<style>
-    audio {
-        display: none;
-    }
-</style>
-"""
-st.markdown(hide_player_css, unsafe_allow_html=True)
 
 # --- AUTOPLAY THE AUDIO ---
 def autoplay_audio(file_path: str):
+    # app를 실행했을 때 넷플릭스 효과음 재생
+    # 자동 실행시키기 위해서 소리허용 설정 필요
+    audio_file = open('audio_netflix.mp3', 'rb')
+    st.audio(audio_file.read(), format='audio/mp3')
+
+    # 창에 떠있는 오디오플레이어 숨기기
+    hide_player_css = """
+    <style>
+        audio {
+            display: none;
+        }
+    </style>
+    """
+    st.markdown(hide_player_css, unsafe_allow_html=True)
+
     # Read the audio file from the local file system
     with open(file_path, "rb") as f:
         data = f.read()
+    
     # Encode the audio data to Base64
     b64 = base64.b64encode(data).decode()
+    
     # Create the HTML audio tag with autoplay
     md = f"""
         <audio autoplay="true">
@@ -97,5 +236,9 @@ def autoplay_audio(file_path: str):
         """
     # Embed the HTML into the Streamlit app
     st.components.v1.html(md, height=0)
-# Call the function to autoplay the audio
-autoplay_audio("audio_netflix.mp3")
+
+
+
+
+if __name__ == "__main__":
+    set_page(), login_button(), after_login(), set_sidebar(), ad(), autoplay_audio("audio_netflix.mp3"),setup_shared_sidebar()
