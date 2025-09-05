@@ -8,6 +8,7 @@ from preprocess import feature_engineering
 from database import Database
 
 import streamlit as st
+from sidebar_utils import setup_shared_sidebar
 
 
 #####################################
@@ -127,6 +128,7 @@ def show_prediction_bar(churn_proba, retention_proba):
 
 def filter_customer():
     st.write("**고객 목록에서 선택하세요:**")
+    st.write("")
 
     # 필터링 옵션
     col1, col2, col3 = st.columns(3)
@@ -542,13 +544,22 @@ with st.expander("사용 가능한 고객 ID 샘플 보기"):
                         st.session_state.search_executed = False
                         st.rerun()  # 페이지 새로고침하여 예측 결과 표시
 
-#################
-# Side Bar 설정 #
-#################
-# 각각의 페이지로 넘어가도록 연결하기
-st.sidebar.header("🚀페이지 이동🚀")
-st.sidebar.page_link("app.py", label="📍기본 페이지📍")
-st.sidebar.page_link("pages/1 Prediction.py", label="🔎고객 이탈 확률 예측🔎")
-st.sidebar.page_link("pages/2 Recommendations.py", label="🪄프로모션 추천🪄")
-st.sidebar.page_link("pages/3 Reasons.py", label="📊이탈 사유 분석📊")
-st.sidebar.success("🙋🏻버튼을 클릭하여 원하는 기능을 사용해보세요!💁🏻‍♀️")
+
+
+# 기본 배경색상을 검정으로 설정하기
+st.markdown("""
+<style>
+/* 사이드바 배경색 설정 */
+[data-testid="stSidebar"] {
+    background-color: #0E1117;
+}
+
+/* 메인 바탕화면 배경색 설정 */
+.main {
+    background-color: #0E1117;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
+setup_shared_sidebar()
