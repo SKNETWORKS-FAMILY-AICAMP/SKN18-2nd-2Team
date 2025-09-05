@@ -1,4 +1,4 @@
-CREATE TABLE examplesdb.Netflix_customers (
+CREATE TABLE netflixDB.Netflix_customers (
   customer_id              INT PRIMARY KEY AUTO_INCREMENT,
   age                      INT,
   gender                   VARCHAR(10),

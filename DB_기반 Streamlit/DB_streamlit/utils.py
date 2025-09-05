@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import os
+import json
 
 import matplotlib.pyplot as plt
 from sklearn.inspection import permutation_importance
@@ -10,6 +11,10 @@ def load_data(train_path, test_path):
     test_df  = pd.read_csv(test_path)
     return train_df, test_df
 
+def get_config():
+    with open("../config.json", encoding="UTF-8") as f:
+        config = json.load(f)
+    return config
 
 def _get_feature_names_from_pre(pre, input_cols):
     """
