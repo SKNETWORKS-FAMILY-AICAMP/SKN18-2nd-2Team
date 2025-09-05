@@ -89,7 +89,7 @@ def save_model(pipe, model_name):
 
 def load_saved_model(model_name):
     """저장된 모델 불러오기"""
-    path = os.path.join("C:/Users/Playdata/Desktop/SKN18-2nd-2Team/saved_models/", f"{model_name}.pkl")
+    path = os.path.join("../saved_models/", f"{model_name}.pkl")
     if not os.path.exists(path):
         raise FileNotFoundError(f"[ERROR] 저장된 모델이 없습니다: {path}")
     return joblib.load(path)

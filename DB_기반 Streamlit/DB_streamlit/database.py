@@ -17,7 +17,6 @@ class Database:
             self.connection = pymysql.connect(host=self.host, port=self.port, user=self.user, password=self.password, 
                                               database=self.db, charset="utf8")
         except Exception as e:
-            print(e)
             print("Connection error")
         else:
             print("connected!")
