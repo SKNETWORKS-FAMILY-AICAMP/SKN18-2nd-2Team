@@ -1,0 +1,37 @@
+1. 환영 복귀 할인 (Welcome Back Discount)
+
+목적: 가격 때문에 떠난 고객을 다시 유입
+
+조건: subscription_type = Basic OR payment_method IN ('Crypto','Gift Card')
+
+프로모션 : “복귀 첫 달 50% 할인”
+
+“3개월 결제 시 1개월 무료”
+
+효과: 가격 저항 완화 → 빠른 재가입 유도
+
+2. 콘텐츠 기반 복귀 (Don’t Miss Out / Sequel Teaser)
+
+목적: 특정 작품만 보고 떠난 원앤던(one-and-done) 고객 복귀
+
+조건: watch_hours < 10 AND favorite_genre 한정
+
+프로모션 :
+
+“고객님이 보셨던 〈○○〉 시즌2 공개! 복귀 시 7일 무료 체험”
+
+“비슷한 장르 추천작 5편 + 첫 달 30% 할인”
+
+효과: 콘텐츠 FOMO 자극, 후속작 기대감으로 재가입
+
+6. 현지화 콘텐츠 캠페인 (Localized Win-Back)
+
+목적: 지역별 인기작 활용
+
+조건: region = 'KR' AND favorite_genre = 'Drama' 같은 조건
+
+오퍼:
+
+“이번 달 화제작 〈더 글로리〉 보러 돌아오세요 → 복귀 시 1주 무료”
+
+효과: 로컬 콘텐츠 열풍을 활용해 단기 복귀율 상승
