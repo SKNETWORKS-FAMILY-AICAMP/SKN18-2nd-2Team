@@ -477,6 +477,8 @@ if customer_id_input:
         # 위험 요소 분석
         if customer['payment_method'] == 'Gift Card':
             risk_factors.append("기프트카드 결제 (만료 위험)")
+        if customer['payment_method'] == 'Crypto':
+            risk_factors.append("암호화폐 결제 (이탈률 높음)")
         if customer['last_login_days'] > 30:
             risk_factors.append("30일 이상 미접속 (매우 높은 위험)")
         elif customer['last_login_days'] > 14:
