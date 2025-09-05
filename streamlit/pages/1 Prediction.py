@@ -1,15 +1,13 @@
 import os, sys
 import pandas as pd
+import streamlit as st
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
 from utils import get_config
 from model import load_saved_model
 from preprocess import feature_engineering
 from database import Database
-
-import streamlit as st
-from sidebar_utils import setup_shared_sidebar
-
+from sidebar_utils import *
 
 #####################################
 # 고객 이탈 확률 예측 페이지 만들기 #
@@ -33,7 +31,6 @@ if prev_page != "prediction":
     for key in ("sample_id_selected", "list_customer_selected",
                 "selected_customer_id", "search_executed"):
         st.session_state.pop(key, None)
-
 
 def show_prediction_prob(user_info):
     # --------------------------
@@ -135,8 +132,6 @@ def show_prediction_bar(churn_proba, retention_proba):
 
 def filter_customer():
     st.write("**고객 목록에서 선택하세요:**")
-    st.write("")
-
     # 필터링 옵션
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -145,7 +140,6 @@ def filter_customer():
         subscription_filter = st.selectbox("구독 타입", ["전체"] + sorted(df['subscription_type'].unique().tolist()))
     with col3:
         gender_filter = st.selectbox("성별", ["전체"] + sorted(df['gender'].unique().tolist()))
-
     col4, col5, col6 = st.columns(3)
     with col4:
         device_filter = st.selectbox("디바이스", ["전체"] + sorted(df['device'].unique().tolist()))
@@ -154,28 +148,21 @@ def filter_customer():
     with col6:
         genre_filter = st.selectbox("선호 장르", ["전체"] + sorted(df['favorite_genre'].unique().tolist()))
 
-
     # 필터 적용
     filtered_df = df.copy()
 
     if region_filter != "전체":
         filtered_df = filtered_df[filtered_df['region'] == region_filter]
-
     if subscription_filter != "전체":
         filtered_df = filtered_df[filtered_df['subscription_type'] == subscription_filter]
-
     if gender_filter != "전체":
         filtered_df = filtered_df[filtered_df['gender'] == gender_filter]
-
     if device_filter != "전체":
         filtered_df = filtered_df[filtered_df['device'] == device_filter]
-
     if payment_filter != "전체":
         filtered_df = filtered_df[filtered_df['payment_method'] == payment_filter]
-
     if genre_filter != "전체":
         filtered_df = filtered_df[filtered_df['favorite_genre'] == genre_filter]
-
 
     # 고객 정보를 보기 좋게 표시하기 위한 포맷팅
     customer_options = []
@@ -295,8 +282,6 @@ def analize_churn_customer(customer, churn_rate):
     
     st.info(f"**종합 위험도:** {risk_level}")
     
-
-
 def show_customer_info(customer):
     # --------------------------
     # 상세 고객 정보
@@ -326,28 +311,12 @@ def render_customer_block(customer_id: str):
     if customer_df.empty:
         st.error("고객을 찾을 수 없습니다.")
         return
+    st.markdown("---")
     customer, churn_proba, retention_proba = show_prediction_prob(customer_df)
     show_prediction_bar(churn_proba, retention_proba)
     analize_churn_customer(customer, churn_proba)
+    st.markdown("---")
     show_customer_info(customer)
-
-def _set_current_customer(cid: str, source: str):
-    # 선택 출처는 참고용(디버깅/UX)
-    st.session_state["current_customer_id"] = cid
-    st.session_state["current_customer_source"] = source
-    # 서로 충돌 안 나게 나머지 키는 정리
-    st.session_state["selected_customer_id"] = cid if source == "manual" else ""
-    st.session_state["sample_id_selected"] = cid if source == "sample" else ""
-    st.session_state["list_customer_selected"] = cid if source == "list" else ""
-    st.session_state["search_executed"] = (source == "manual")
-
-st.markdown("""
-    <style>
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    [data-testid="stSidebarNav"] {display: none;}
-    </style>
-    """, unsafe_allow_html=True)
 
 config = get_config()
 db_instance = Database(**config["database"])
@@ -396,21 +365,64 @@ with tab1:
     # 1) 직접 입력 후 조회 버튼 클릭 시
     if search_clicked:
         if input_customer_id:
-             _set_current_customer(input_customer_id, "manual")
+            st.session_state.selected_customer_id = input_customer_id
+            st.session_state.search_executed = True
+            render_customer_block(input_customer_id)
         else:
             st.error("고객 ID를 입력해주세요.")
 
     # 2) 자동 렌더링: 샘플ID / 목록선택 / 최근 직접조회 순으로 우선 적용
     elif st.session_state.get("sample_id_selected"):
-        _set_current_customer(st.session_state.sample_id_selected,"manual")
-    elif st.session_state.get("list_customer_selected","manual"):
-        _set_current_customer(st.session_state.list_customer_selected,"manual")
+        render_customer_block(st.session_state.sample_id_selected)
+    elif st.session_state.get("list_customer_selected"):
+        render_customer_block(st.session_state.list_customer_selected)
     elif st.session_state.get("search_executed") and st.session_state.get("selected_customer_id"):
-        _set_current_customer(st.session_state.selected_customer_id,"manual")
+        render_customer_block(st.session_state.selected_customer_id)
+    # 사용 가능한 고객 ID 샘플 표시
+    with st.expander("사용 가능한 고객 ID 샘플 보기"):
+        st.write("**샘플 고객 ID들:**")
+        
+        # 전체 고객 ID 목록
+        all_customer_ids = df['customer_id'].tolist()
+        total_customers = len(all_customer_ids)
+        
+        # 페이지네이션 설정 (50개씩)
+        items_per_page = 50
+        total_pages = (total_customers - 1) // items_per_page + 1
+        
+        # 페이지 선택
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            current_page = st.selectbox(
+                f"페이지 선택 (총 {total_pages}페이지, {total_customers}개 고객 ID)",
+                range(1, total_pages + 1),
+                key="id_page_selector"
+            )
+        
+        # 현재 페이지의 고객 ID 계산
+        start_idx = (current_page - 1) * items_per_page
+        end_idx = min(start_idx + items_per_page, total_customers)
+        page_customer_ids = all_customer_ids[start_idx:end_idx]
+        
+        st.write(f"**{current_page}페이지 ({start_idx + 1}-{end_idx}번째 고객 ID)**")
+        
+        # 10개씩 한 줄에 표시
+        for i in range(0, len(page_customer_ids), 10):
+            cols = st.columns(10)
+            for j, customer_id in enumerate(page_customer_ids[i:i+10]):
+                with cols[j]:
+                    # 고객 ID를 클릭 가능한 버튼으로 만들기
+                    button_key = f"id_button_{customer_id}"
+                    customer_id_str = str(customer_id)+" 고객"
+                    if st.button(customer_id_str, key=button_key, help=customer_id_str):
+                        # 클릭하면 해당 고객 ID로 예측 실행 (샘플 ID 클릭)
+                        if st.session_state.sample_id_selected != customer_id:
+                            st.session_state.sample_id_selected = customer_id
+                            st.session_state.selected_customer_id = ""
+                            st.session_state.list_customer_selected = ""
+                            st.session_state.search_executed = False
+                            st.rerun()  # 페이지 새로고침하여 예측 결과 표시
 
-current_id = st.session_state.get("current_customer_id", "")
-if current_id:
-    render_customer_block(current_id)
 with tab2:
     st.write("**직접/선택 입력으로 사용자의 특성을 넣고 이탈 확률을 예측합니다.**")
 
@@ -514,59 +526,6 @@ with tab2:
         customer, churn_proba, retention_proba = show_prediction_prob(X_user)
         show_prediction_bar(churn_proba, retention_proba)
         analize_churn_customer(customer, churn_proba)
+        
 
-
-# 사용 가능한 고객 ID 샘플 표시
-with st.expander("사용 가능한 고객 ID 샘플 보기"):
-    st.write("**샘플 고객 ID들:**")
-    
-    # 전체 고객 ID 목록
-    all_customer_ids = df['customer_id'].tolist()
-    total_customers = len(all_customer_ids)
-    
-    # 페이지네이션 설정 (50개씩)
-    items_per_page = 50
-    total_pages = (total_customers - 1) // items_per_page + 1
-    
-    # 페이지 선택
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        current_page = st.selectbox(
-            f"페이지 선택 (총 {total_pages}페이지, {total_customers}개 고객 ID)",
-            range(1, total_pages + 1),
-            key="id_page_selector"
-        )
-    
-    # 현재 페이지의 고객 ID 계산
-    start_idx = (current_page - 1) * items_per_page
-    end_idx = min(start_idx + items_per_page, total_customers)
-    page_customer_ids = all_customer_ids[start_idx:end_idx]
-    
-    st.write(f"**{current_page}페이지 ({start_idx + 1}-{end_idx}번째 고객 ID)**")
-    
-    # 10개씩 한 줄에 표시
-    for i in range(0, len(page_customer_ids), 10):
-        cols = st.columns(10)
-        for j, customer_id in enumerate(page_customer_ids[i:i+10]):
-            with cols[j]:
-                # 고객 ID를 클릭 가능한 버튼으로 만들기
-                button_key = f"id_button_{customer_id}"
-                customer_id_str = str(customer_id)+" 고객"
-                if st.button(customer_id_str, key=button_key, help=customer_id_str):
-                    _set_current_customer(str(customer_id), "sample")
-                    st.rerun()
-
-
-
-# 기본 배경색상을 검정으로 설정하기
-st.markdown("""
-<style>
-/* 사이드바 배경색 설정 */
-[data-testid="stSidebar"] {
-    background-color: #0E1117;
-}
-</style>
-""", unsafe_allow_html=True)
-
-
-setup_shared_sidebar()
+setup_css_styles(), login_button(), set_sidebar(), ad()

@@ -5,7 +5,7 @@ import pandas as pd
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from utils import get_config
 from database import Database
-from sidebar_utils import setup_shared_sidebar
+from sidebar_utils import *
 
 ###############################
 # 프로모션 추천 페이지 만들기 #
@@ -17,15 +17,8 @@ from sidebar_utils import setup_shared_sidebar
 #     - 각 고객별로 맞춤형 프로모션을 추천 
 #     ex) 할인, 기프트카드 등등
 
-st.markdown("""
-    <style>
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    [data-testid="stSidebarNav"] {display: none;}
-    </style>
-    """, unsafe_allow_html=True)
-
-st.title("🪄분석및 프로모션 추천🪄")
+st.title("🪄분석 및 프로모션 추천🪄")
+st.session_state["current_page"] = "recommend"
 
 # Netflix 고객 데이터 로드
 config = get_config()
@@ -84,10 +77,8 @@ def get_churned_customers_with_promotions():
             return "🎯 기본 복귀 혜택: 무료 AI 맞춤 서비스 제공"
     
     # 프로모션 추천 적용
-    churned_customers['추천_프로모션'] = churned_customers.apply(recommend_promotion, axis=1)
-    
+    churned_customers['추천_프로모션'] = churned_customers.apply(recommend_promotion, axis=1)    
     return churned_customers
-
 
 # 전체 고객 데이터 로드 및 프로모션 적용
 def get_all_customers_with_promotions():
@@ -309,10 +300,10 @@ with tab2:
         
         st.markdown("#### **4. 프리미엄 고객 집중 강화**")
         st.markdown("• **대상**: Premium 구독자 및 고액결제자 (유지 고객)")
-        st.markdown("• **혜택**: 4K 콘텐츠 무제한 + 첫 달 무료")
+        st.markdown("• **혜택**: 4K 콘텐츠 무제한 + 요금제 할인쿠폰 제공")
         
         st.markdown("#### **5. 기본 유지 강화**")
-        st.markdown("• **대상**: 기타 모든 유지 고객 (churn=0)")
+        st.markdown("• **대상**: 기타 모든 유지 고객")
         st.markdown("• **혜택**: 무료 AI 맞춤 서비스 제공")
 
     # 이탈 및 유지 프로모션 비율 계산
@@ -322,7 +313,7 @@ with tab2:
     # 이탈 고객과 유지 고객 분리
     churned_customers = customers[customers['churned'] == 1]
     retained_customers = customers[customers['churned'] == 0]
-    total_customers = len(customers)
+    total_customers = len(churned_customers) + len(retained_customers)
     
     # 전체 비율 표시
     col1, col2, col3 = st.columns(3)
@@ -457,4 +448,4 @@ with tab2:
         use_container_width=True
     )
 
-setup_shared_sidebar()
+setup_css_styles(), login_button(), set_sidebar(), ad()
