@@ -25,8 +25,6 @@ from sidebar_utils import setup_shared_sidebar
 #     - 예측 결과에 따른 주요 이탈 행동요인을 텍스트 혹은 그래프로 표시
 # 기본 sidebar 없애기
 
-<<<<<<< HEAD
-=======
 # --- 페이지 진입 시 세션 리셋: 다른 페이지에서 들어왔을 때만 ---
 prev_page = st.session_state.get("current_page")
 st.session_state["current_page"] = "prediction"
@@ -37,7 +35,6 @@ if prev_page != "prediction":
         st.session_state.pop(key, None)
 
 
->>>>>>> dev
 def show_prediction_prob(user_info):
     # --------------------------
     # 예측 결과 출력 (모델 사용)
@@ -112,12 +109,6 @@ def show_prediction_bar(churn_proba, retention_proba):
     </style>
     """, unsafe_allow_html=True)
     
-<<<<<<< HEAD
-    # 확률 표시 컨테이너
-    # st.markdown('<div class="probability-container">', unsafe_allow_html=True)
-    
-=======
->>>>>>> dev
     # 이탈 확률 바 (동적 크기)
     churn_width = max(80, int(churn_proba * 4))  # 최소 80px, 최대 380px
     st.markdown(f"""
@@ -335,17 +326,11 @@ def render_customer_block(customer_id: str):
     if customer_df.empty:
         st.error("고객을 찾을 수 없습니다.")
         return
-<<<<<<< HEAD
-    print(customer_df)
-=======
->>>>>>> dev
     customer, churn_proba, retention_proba = show_prediction_prob(customer_df)
     show_prediction_bar(churn_proba, retention_proba)
     analize_churn_customer(customer, churn_proba)
     show_customer_info(customer)
 
-<<<<<<< HEAD
-=======
 def _set_current_customer(cid: str, source: str):
     # 선택 출처는 참고용(디버깅/UX)
     st.session_state["current_customer_id"] = cid
@@ -356,7 +341,6 @@ def _set_current_customer(cid: str, source: str):
     st.session_state["list_customer_selected"] = cid if source == "list" else ""
     st.session_state["search_executed"] = (source == "manual")
 
->>>>>>> dev
 st.markdown("""
     <style>
     footer {visibility: hidden;}
@@ -412,26 +396,12 @@ with tab1:
     # 1) 직접 입력 후 조회 버튼 클릭 시
     if search_clicked:
         if input_customer_id:
-<<<<<<< HEAD
-            st.session_state.selected_customer_id = input_customer_id
-            st.session_state.search_executed = True
-            render_customer_block(input_customer_id)
-=======
              _set_current_customer(input_customer_id, "manual")
->>>>>>> dev
         else:
             st.error("고객 ID를 입력해주세요.")
 
     # 2) 자동 렌더링: 샘플ID / 목록선택 / 최근 직접조회 순으로 우선 적용
     elif st.session_state.get("sample_id_selected"):
-<<<<<<< HEAD
-        render_customer_block(st.session_state.sample_id_selected)
-    elif st.session_state.get("list_customer_selected"):
-        render_customer_block(st.session_state.list_customer_selected)
-    elif st.session_state.get("search_executed") and st.session_state.get("selected_customer_id"):
-        render_customer_block(st.session_state.selected_customer_id)
-
-=======
         _set_current_customer(st.session_state.sample_id_selected,"manual")
     elif st.session_state.get("list_customer_selected","manual"):
         _set_current_customer(st.session_state.list_customer_selected,"manual")
@@ -441,7 +411,6 @@ with tab1:
 current_id = st.session_state.get("current_customer_id", "")
 if current_id:
     render_customer_block(current_id)
->>>>>>> dev
 with tab2:
     st.write("**직접/선택 입력으로 사용자의 특성을 넣고 이탈 확률을 예측합니다.**")
 
@@ -584,18 +553,8 @@ with st.expander("사용 가능한 고객 ID 샘플 보기"):
                 button_key = f"id_button_{customer_id}"
                 customer_id_str = str(customer_id)+" 고객"
                 if st.button(customer_id_str, key=button_key, help=customer_id_str):
-<<<<<<< HEAD
-                    # 클릭하면 해당 고객 ID로 예측 실행 (샘플 ID 클릭)
-                    if st.session_state.sample_id_selected != customer_id:
-                        st.session_state.sample_id_selected = customer_id
-                        st.session_state.selected_customer_id = ""
-                        st.session_state.list_customer_selected = ""
-                        st.session_state.search_executed = False
-                        st.rerun()  # 페이지 새로고침하여 예측 결과 표시
-=======
                     _set_current_customer(str(customer_id), "sample")
                     st.rerun()
->>>>>>> dev
 
 
 
@@ -606,14 +565,6 @@ st.markdown("""
 [data-testid="stSidebar"] {
     background-color: #0E1117;
 }
-<<<<<<< HEAD
-
-/* 메인 바탕화면 배경색 설정 */
-.main {
-    background-color: #0E1117;
-}
-=======
->>>>>>> dev
 </style>
 """, unsafe_allow_html=True)
 

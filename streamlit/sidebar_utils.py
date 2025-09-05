@@ -17,11 +17,6 @@ def setup_shared_sidebar():
     setup_sidebar_navigation()
 
     display_sidebar_ads()
-<<<<<<< HEAD
-    
-
-=======
->>>>>>> dev
 
 def handle_sidebar_login():
     """사이드바 로그인/로그아웃 처리"""
@@ -39,38 +34,33 @@ def handle_sidebar_login():
 
 def setup_sidebar_navigation():
     """사이드바 네비게이션 설정"""
-<<<<<<< HEAD
-    st.sidebar.subheader("🚀페이지 이동🚀")
-    st.sidebar.page_link("./app.py", label="📍기본 페이지")
-    st.sidebar.page_link("./pages/1 Prediction.py", label="🔎고객 이탈 확률 예측")
-    st.sidebar.page_link("./pages/2 Recommendations.py", label="🪄프로모션 추천")
-    st.sidebar.page_link("./pages/3 Reasons.py", label="📊이탈 사유 분석")
-    st.sidebar.success("🙋🏻버튼을 클릭하여 원하는 기능을 사용해보세요!💁🏻‍♀️")
-=======
     st.sidebar.header("🚀페이지 이동🚀")
     st.sidebar.page_link("app.py", label="📍기본 페이지📍")
     st.sidebar.page_link("pages/1 Prediction.py", label="🔎고객 이탈 확률 예측🔎")
     st.sidebar.page_link("pages/2 Recommendations.py", label="🪄분석및 프로모션 추천🪄")
     st.sidebar.success("🙋🏻버튼을 클릭하여 원하는 기능을 사용해보세요!💁🏻‍♀️")   
->>>>>>> dev
 
 def get_ad_list():
     """광고 리스트 데이터 반환"""
     return [
-        {"image": "./images/말차라떼 머셔~.png", "text": "쌉사름하고 진한 말차의 향을 그대로!"},
+        {"image": "./images/말차라떼 머셔~.png", "text": "진한 말차의 향을 그대로!"},
         {"image": "./images/바나나라떼 머셔~.png", "text": "당 떨어질 땐? 밍그래 머셔~"},
         {"image": "./images/소주 머셔~.png", "text": "이모 청이슬 하나요."}
     ]
 
 def display_sidebar_ads():
-    """사이드바 광고 표시"""
-    ad_list = get_ad_list()
-    st.sidebar.subheader("광고문의: 02-9965-4668")
+    ad_list = [
+        {"image": "./images/말차라떼 머셔~.png", "text": "진한 말차의 향을 그대로!"},
+        {"image": "./images/바나나라떼 머셔~.png", "text": "당 떨어질 땐? 밍그래 머셔~"},
+        {"image": "./images/소주 머셔~.png", "text": "이모 청이슬 하나요."}
+]
+    # 사이드바에 이미지 순차 출력
     with st.sidebar:
         image_placeholder = st.empty()
     
+    # 이미지 순환
     current_index = 0
-    
+    st.sidebar.write("광고문의: 02-9965-4668")
     while True:
         if ad_list:
             try:
@@ -84,8 +74,7 @@ def display_sidebar_ads():
                 current_index = (current_index + 1) % len(ad_list)
             except:
                 pass
-        
-        time.sleep(2)
+        time.sleep(2)  # 2초마다 변경
 
 def setup_css_styles():
     """CSS 스타일 설정"""

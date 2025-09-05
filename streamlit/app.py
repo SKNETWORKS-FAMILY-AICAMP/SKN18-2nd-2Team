@@ -110,11 +110,11 @@ def login_button():
 def after_login():
     # 넷플릭스 프로필 설정
     profiles = [
-        {"name": "안시현", "avatar": "https://i.pinimg.com/474x/e3/94/30/e39430434d2b8207188f880ac66c6411.jpg", "info": "팀장님"},
-        {"name": "김규리", "avatar": "https://i.pinimg.com/564x/1b/a2/e6/1ba2e6d1d4874546c70c91f1024e17fb.jpg", "info": "팀장님"},
-        {"name": "김민주", "avatar": "https://wallpapers.com/images/hd/netflix-profile-pictures-1000-x-1000-dyrp6bw6adbulg5b.jpg", "info": "팀장님"},
-        {"name": "김주석", "avatar": "https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png", "info": "팀장님"},
-        {"name": "최준호", "avatar": "https://wallpapers.com/images/hd/netflix-profile-pictures-1000-x-1000-88wkdmjrorckekha.jpg", "info": "팀장님"},
+        {"name": "안시현", "avatar": "https://i.pinimg.com/474x/e3/94/30/e39430434d2b8207188f880ac66c6411.jpg", "info": "팀장 팀장님"},
+        {"name": "김규리", "avatar": "https://i.pinimg.com/564x/1b/a2/e6/1ba2e6d1d4874546c70c91f1024e17fb.jpg", "info": "진짜 팀장님"},
+        {"name": "김민주", "avatar": "https://wallpapers.com/images/hd/netflix-profile-pictures-1000-x-1000-dyrp6bw6adbulg5b.jpg", "info": "진짜 진짜 팀장님"},
+        {"name": "김주석", "avatar": "https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png", "info": "최종 팀장님"},
+        {"name": "최준호", "avatar": "https://wallpapers.com/images/hd/netflix-profile-pictures-1000-x-1000-88wkdmjrorckekha.jpg", "info": "최최종 팀장님"},
     ]
     # 로그인 상태일 경우 프로필 선택 창이 나타남
     if st.session_state.login:
@@ -157,7 +157,7 @@ def after_login():
 # 광고창 
 def ad():
     ad_list = [
-        {"image": "./images/말차라떼 머셔~.png", "text": "쌉사름하고 진한 말차의 향을 그대로!"},
+        {"image": "./images/말차라떼 머셔~.png", "text": "진한 말차의 향을 그대로!"},
         {"image": "./images/바나나라떼 머셔~.png", "text": "당 떨어질 땐? 밍그래 머셔~"},
         {"image": "./images/소주 머셔~.png", "text": "이모 청이슬 하나요."}
 ]
@@ -188,21 +188,10 @@ def set_sidebar():
     # 기본 sidebar 없애기
     st.markdown("""
         <style>
-        footer {visibility: hidden;}
-        header {visibility: hidden;}
         [data-testid="stSidebarNav"] {display: none;}
         </style>
         """, unsafe_allow_html=True)
 
-<<<<<<< HEAD
-    # 각각의 페이지로 넘어가도록 연결하기
-    st.sidebar.subheader("🚀페이지 이동🚀")
-    st.sidebar.page_link("app.py", label="📍기본 페이지")
-    st.sidebar.page_link("pages/1 Prediction.py", label="🔎고객 이탈 확률 예측")
-    st.sidebar.page_link("pages/2 Recommendations.py", label="🪄프로모션 추천")
-    st.sidebar.page_link("pages/3 Reasons.py", label="📊이탈 사유 분석")
-    st.sidebar.success("🙋🏻버튼을 클릭하여 원하는 기능을 사용해보세요!💁🏻‍♀️")
-=======
     #################
     # Side Bar 설정 #
     #################
@@ -211,7 +200,6 @@ def set_sidebar():
     st.sidebar.page_link("pages/1 Prediction.py", label="🔎고객 이탈 확률 예측🔎")
     st.sidebar.page_link("pages/2 Recommendations.py", label="🪄분석및 프로모션 추천🪄")
     st.sidebar.success("🙋🏻버튼을 클릭하여 원하는 기능을 사용해보세요!💁🏻‍♀️")   
->>>>>>> dev
 
 
 
@@ -219,7 +207,7 @@ def set_sidebar():
 def autoplay_audio(file_path: str):
     # app를 실행했을 때 넷플릭스 효과음 재생
     # 자동 실행시키기 위해서 소리허용 설정 필요
-    audio_file = open('audio_netflix.mp3', 'rb')
+    audio_file = open('./images/audio_netflix.mp3', 'rb')
     st.audio(audio_file.read(), format='audio/mp3')
 
     # 창에 떠있는 오디오플레이어 숨기기
@@ -252,8 +240,5 @@ def autoplay_audio(file_path: str):
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD
-=======
     st.session_state["current_page"] = "app"
->>>>>>> dev
-    set_page(), login_button(), after_login(), set_sidebar(), ad(), autoplay_audio("audio_netflix.mp3"),setup_shared_sidebar()
+    set_page(), login_button(), after_login(), autoplay_audio("./images/audio_netflix.mp3"), set_sidebar(), ad(), setup_shared_sidebar()
