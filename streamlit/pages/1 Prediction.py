@@ -1,14 +1,14 @@
 import os, sys
 import pandas as pd
+import streamlit as st
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
 from utils import get_config
 from model import load_saved_model
 from preprocess import feature_engineering
 from database import Database
-
-import streamlit as st
 from sidebar_utils import setup_shared_sidebar
+
 
 
 #####################################
@@ -33,7 +33,6 @@ if prev_page != "prediction":
     for key in ("sample_id_selected", "list_customer_selected",
                 "selected_customer_id", "search_executed"):
         st.session_state.pop(key, None)
-
 
 def show_prediction_prob(user_info):
     # --------------------------
@@ -109,6 +108,9 @@ def show_prediction_bar(churn_proba, retention_proba):
     </style>
     """, unsafe_allow_html=True)
     
+    # 확률 표시 컨테이너
+    # st.markdown('<div class="probability-container">', unsafe_allow_html=True)
+    
     # 이탈 확률 바 (동적 크기)
     churn_width = max(80, int(churn_proba * 4))  # 최소 80px, 최대 380px
     st.markdown(f"""
@@ -135,7 +137,6 @@ def show_prediction_bar(churn_proba, retention_proba):
 
 def filter_customer():
     st.write("**고객 목록에서 선택하세요:**")
-    st.write("")
 
     # 필터링 옵션
     col1, col2, col3 = st.columns(3)
@@ -326,20 +327,11 @@ def render_customer_block(customer_id: str):
     if customer_df.empty:
         st.error("고객을 찾을 수 없습니다.")
         return
+    print(customer_df)
     customer, churn_proba, retention_proba = show_prediction_prob(customer_df)
     show_prediction_bar(churn_proba, retention_proba)
     analize_churn_customer(customer, churn_proba)
     show_customer_info(customer)
-
-def _set_current_customer(cid: str, source: str):
-    # 선택 출처는 참고용(디버깅/UX)
-    st.session_state["current_customer_id"] = cid
-    st.session_state["current_customer_source"] = source
-    # 서로 충돌 안 나게 나머지 키는 정리
-    st.session_state["selected_customer_id"] = cid if source == "manual" else ""
-    st.session_state["sample_id_selected"] = cid if source == "sample" else ""
-    st.session_state["list_customer_selected"] = cid if source == "list" else ""
-    st.session_state["search_executed"] = (source == "manual")
 
 st.markdown("""
     <style>
@@ -396,21 +388,20 @@ with tab1:
     # 1) 직접 입력 후 조회 버튼 클릭 시
     if search_clicked:
         if input_customer_id:
-             _set_current_customer(input_customer_id, "manual")
+            st.session_state.selected_customer_id = input_customer_id
+            st.session_state.search_executed = True
+            render_customer_block(input_customer_id)
         else:
             st.error("고객 ID를 입력해주세요.")
 
     # 2) 자동 렌더링: 샘플ID / 목록선택 / 최근 직접조회 순으로 우선 적용
     elif st.session_state.get("sample_id_selected"):
-        _set_current_customer(st.session_state.sample_id_selected,"manual")
-    elif st.session_state.get("list_customer_selected","manual"):
-        _set_current_customer(st.session_state.list_customer_selected,"manual")
+        render_customer_block(st.session_state.sample_id_selected)
+    elif st.session_state.get("list_customer_selected"):
+        render_customer_block(st.session_state.list_customer_selected)
     elif st.session_state.get("search_executed") and st.session_state.get("selected_customer_id"):
-        _set_current_customer(st.session_state.selected_customer_id,"manual")
+        render_customer_block(st.session_state.selected_customer_id)
 
-current_id = st.session_state.get("current_customer_id", "")
-if current_id:
-    render_customer_block(current_id)
 with tab2:
     st.write("**직접/선택 입력으로 사용자의 특성을 넣고 이탈 확률을 예측합니다.**")
 
@@ -553,20 +544,12 @@ with st.expander("사용 가능한 고객 ID 샘플 보기"):
                 button_key = f"id_button_{customer_id}"
                 customer_id_str = str(customer_id)+" 고객"
                 if st.button(customer_id_str, key=button_key, help=customer_id_str):
-                    _set_current_customer(str(customer_id), "sample")
-                    st.rerun()
-
-
-
-# 기본 배경색상을 검정으로 설정하기
-st.markdown("""
-<style>
-/* 사이드바 배경색 설정 */
-[data-testid="stSidebar"] {
-    background-color: #0E1117;
-}
-</style>
-""", unsafe_allow_html=True)
-
+                    # 클릭하면 해당 고객 ID로 예측 실행 (샘플 ID 클릭)
+                    if st.session_state.sample_id_selected != customer_id:
+                        st.session_state.sample_id_selected = customer_id
+                        st.session_state.selected_customer_id = ""
+                        st.session_state.list_customer_selected = ""
+                        st.session_state.search_executed = False
+                        st.rerun()  # 페이지 새로고침하여 예측 결과 표시
 
 setup_shared_sidebar()

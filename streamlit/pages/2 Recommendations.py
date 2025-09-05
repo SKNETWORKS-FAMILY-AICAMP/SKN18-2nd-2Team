@@ -26,7 +26,7 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 st.title("🪄분석및 프로모션 추천🪄")
-
+st.session_state["current_page"] = "recommend"
 # Netflix 고객 데이터 로드
 config = get_config()
 db_instance = Database(**config["database"])
