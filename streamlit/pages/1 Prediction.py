@@ -2,9 +2,10 @@ import os, sys
 import pandas as pd
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
-from utils import load_data
+from utils import get_config
 from model import load_saved_model
 from preprocess import feature_engineering
+from database import Database
 
 import streamlit as st
 
@@ -30,23 +31,21 @@ def show_prediction_prob(user_info):
     if not user_info.empty:
         customer = user_info.iloc[0]
         st.subheader("예측 결과")
-
         try:
             # 1) 고객 데이터 준비
             try:
-                user_info.drop(columns=["churned"], inplace=True)
+                X_customer = user_info.copy().drop(columns=["churned"])
             except:
-                pass
-            X_customer = feature_engineering(user_info)
-
+                X_customer = feature_engineering(user_info)
+            else:
+                X_customer = feature_engineering(X_customer)
+    
             # 2) 선택된 모델 불러오기
             pipe = load_saved_model(model_name)
 
             # 3) 예측 확률 얻기
             churn_proba = pipe.predict_proba(X_customer)[0][1] * 100
             retention_proba = 100 - churn_proba
-            
-            
         except Exception as e:
             st.error(f"모델 예측 실패: {e}")
     return customer, churn_proba, retention_proba
@@ -314,10 +313,11 @@ def render_customer_block(customer_id: str):
     """customer_id로 예측/분석/상세정보를 한 번에 렌더링"""
     if not customer_id:
         return
-    customer_df = df[df['customer_id'] == customer_id]
+    customer_df = df[df['customer_id'] == int(customer_id)]
     if customer_df.empty:
         st.error("고객을 찾을 수 없습니다.")
         return
+    print(customer_df)
     customer, churn_proba, retention_proba = show_prediction_prob(customer_df)
     show_prediction_bar(churn_proba, retention_proba)
     analize_churn_customer(customer, churn_proba)
@@ -331,9 +331,15 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
+config = get_config()
+db_instance = Database(**config["database"])
+db_instance.connect()
+rows, cols = db_instance.read_all_data()
+
+df = pd.DataFrame(rows, columns=cols)
+
 st.title("🔎고객 이탈 확률 예측🔎")
 
-_, df = load_data("../data/train.csv","../data/test.csv")
 all_models = [
     "LogisticRegression", "RandomForest", "XGBoost", "LightGBM", "CatBoost",
     "SVC", "ExtraTrees", "AdaBoost", "HistGradientBoosting", "GradientBoosting",
@@ -485,6 +491,7 @@ with tab2:
         submit = st.form_submit_button("예측", type="primary")
     if submit:
         X_user = pd.DataFrame([user_inputs])
+        db_instance.insert(user_inputs)
         customer, churn_proba, retention_proba = show_prediction_prob(X_user)
         show_prediction_bar(churn_proba, retention_proba)
         analize_churn_customer(customer, churn_proba)
@@ -525,7 +532,8 @@ with st.expander("사용 가능한 고객 ID 샘플 보기"):
             with cols[j]:
                 # 고객 ID를 클릭 가능한 버튼으로 만들기
                 button_key = f"id_button_{customer_id}"
-                if st.button(customer_id[:8], key=button_key, help=customer_id):
+                customer_id_str = str(customer_id)+" 고객"
+                if st.button(customer_id_str, key=button_key, help=customer_id_str):
                     # 클릭하면 해당 고객 ID로 예측 실행 (샘플 ID 클릭)
                     if st.session_state.sample_id_selected != customer_id:
                         st.session_state.sample_id_selected = customer_id
