@@ -194,6 +194,7 @@ def set_sidebar():
         </style>
         """, unsafe_allow_html=True)
 
+<<<<<<< HEAD
     # 각각의 페이지로 넘어가도록 연결하기
     st.sidebar.subheader("🚀페이지 이동🚀")
     st.sidebar.page_link("app.py", label="📍기본 페이지")
@@ -201,6 +202,16 @@ def set_sidebar():
     st.sidebar.page_link("pages/2 Recommendations.py", label="🪄프로모션 추천")
     st.sidebar.page_link("pages/3 Reasons.py", label="📊이탈 사유 분석")
     st.sidebar.success("🙋🏻버튼을 클릭하여 원하는 기능을 사용해보세요!💁🏻‍♀️")
+=======
+    #################
+    # Side Bar 설정 #
+    #################
+    st.sidebar.header("🚀페이지 이동🚀")
+    st.sidebar.page_link("app.py", label="📍기본 페이지📍")
+    st.sidebar.page_link("pages/1 Prediction.py", label="🔎고객 이탈 확률 예측🔎")
+    st.sidebar.page_link("pages/2 Recommendations.py", label="🪄분석및 프로모션 추천🪄")
+    st.sidebar.success("🙋🏻버튼을 클릭하여 원하는 기능을 사용해보세요!💁🏻‍♀️")   
+>>>>>>> dev
 
 
 
@@ -241,4 +252,8 @@ def autoplay_audio(file_path: str):
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
+=======
+    st.session_state["current_page"] = "app"
+>>>>>>> dev
     set_page(), login_button(), after_login(), set_sidebar(), ad(), autoplay_audio("audio_netflix.mp3"),setup_shared_sidebar()
