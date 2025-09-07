@@ -1,0 +1,24 @@
+Validation Accuracy: 0.9900
+Validation Macro-F1: 0.9900
+
+              precision    recall  f1-score   support
+
+           0       0.99      0.99      0.99       348
+           1       0.99      0.99      0.99       352
+
+    accuracy                           0.99       700
+   macro avg       0.99      0.99      0.99       700
+weighted avg       0.99      0.99      0.99       700
+
+
+Test Accuracy: 0.9920
+Test Macro-F1: 0.9920
+
+              precision    recall  f1-score   support
+
+           0       0.99      0.99      0.99       746
+           1       0.99      0.99      0.99       754
+
+    accuracy                           0.99      1500
+   macro avg       0.99      0.99      0.99      1500
+weighted avg       0.99      0.99      0.99      1500
