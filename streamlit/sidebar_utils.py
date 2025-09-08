@@ -44,7 +44,6 @@ def set_sidebar():
     st.sidebar.page_link("app.py", label="📍기본 페이지📍")
     st.sidebar.page_link("pages/1 Prediction.py", label="🔎고객 이탈 확률 예측🔎")
     st.sidebar.page_link("pages/2 Recommendations.py", label="🪄분석 및 프로모션 추천🪄")
-    st.sidebar.success("🙋🏻버튼을 클릭하여 원하는 기능을 사용해보세요!💁🏻‍♀️")
 
 # 광고창 
 def ad():
