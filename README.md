@@ -8,9 +8,9 @@
 
 ## 📊 데이터 개요
 
-최근 K pop 데몬 헌터로 큰 성공을 이룬 넷플릭스는 OTT 시장에서 선두주자로 활약하고 있습니다.
-그럼에도 불구하고 고객 이탈문제가가 심화되고 있어 골머리를 앓고 있습니다. 
-이 프로젝트는 고객 데이터를 ML로 분석해 이탈 가능성이 높은 고객을 조기 식별해 이탈을 방지하는 것을 목표로 하고 있습니다
+최근 K pop 데몬 헌터스로 큰 성공을 이룬 넷플릭스는 OTT 시장에서 선두주자로 활약하고 있습니다.
+그럼에도 불구하고 고객 이탈문제가 심화되고 있어 골머리를 앓고 있습니다. 
+이 프로젝트는 고객 데이터를 ML로 분석해 이탈 가능성이 높은 고객을 조기 식별해 이탈을 방지하는 것을 목표로 하고 있습니다.
 
 ---
 
@@ -53,101 +53,7 @@
 
 ### 📊 이탈 여부별 연령 분포
 ![Age Distribution by churned](images/age_distribution_by_churned.png)  
-➡️ 연령 자체로는 churn 구분력이 크지 않음. 다만 일부 구간(20대 초반, 60대 초반)에서 이탈률이 약간 높음.
-
----
-
-### 📺 시청 시간 분포
-![Watch Hours](images/watch_hours_distribution.png)
-
-### ⏳ 이탈 여부별 시청 시간
-![Watch Hours by Churned](images/watch_hours_distribution_by_churned.png)  
-➡️ 이탈 고객은 시청시간이 현저히 낮음 → **시청시간은 강력한 예측 요인**.
-
----
-
-### ✅ 최근 로그인 경과일 vs 이탈 여부
-![Last login vs Churned](images/last_login_days_distribution_by_churned.png)  
-➡️ 최근 로그인일이 길수록 이탈 확률 ↑.  
-“오래 로그인 안 한 고객 → 이탈 위험군”
-
-
----
-### 💲 구독 요금제별 이탈률
-![Subscription type churn rate](images/subscription_type_churn_rate.png)  
-➡️ Basic 요금제 고객의 이탈률이 확연히 높음. Premium/Standard는 상대적으로 낮음.
-
----
-### ✅각 모델별 정확도 
-
-![model_performance](images/model_performance.png)
-
----
-
-### ⭐Feature Importances
-    ➡️ 각 모델의 중요도 상위피쳐
-<p align="center">
-  <a href="images/feature_importances/AdaBoost_feature_importances_permute.png"><img src="images/feature_importances/AdaBoost_feature_importances_permute.png" width="450"/></a>
-  <a href="images/feature_importances/CatBoost_feature_importances_permute.png"><img src="images/feature_importances/CatBoost_feature_importances_permute.png" width="450"/></a>
-  <a href="images/feature_importances/ExtraTrees_feature_importances_permute.png"><img src="images/feature_importances/ExtraTrees_feature_importances_permute.png" width="450"/></a>
-</p>
-
-<p align="center">
-  <a href="images/feature_importances/HistGradientBoosting_feature_importances_permute.png"><img src="images/feature_importances/HistGradientBoosting_feature_importances_permute.png" width="450"/></a>
-  <a href="images/feature_importances/KNeighbors_feature_importances_permute.png"><img src="images/feature_importances/KNeighbors_feature_importances_permute.png" width="450"/></a>
-  <a href="images/feature_importances/LightGBM_feature_importances_permute.png"><img src="images/feature_importances/LightGBM_feature_importances_permute.png" width="450"/></a>
-</p>
-
-<p align="center">
-  <a href="images/feature_importances/MLPClassifier_feature_importances_permute.png"><img src="images/feature_importances/MLPClassifier_feature_importances_permute.png" width="450"/></a>
-  <a href="images/feature_importances/RandomForest_feature_importances_permute.png"><img src="images/feature_importances/RandomForest_feature_importances_permute.png" width="450"/></a>
-  <a href="images/feature_importances/RidgeClassifier_feature_importances_permute.png"><img src="images/feature_importances/RidgeClassifier_feature_importances_permute.png" width="450"/></a>
-</p>
-
-<p align="center">
-  <a href="images/feature_importances/XGBoost_feature_importances_permute.png"><img src="images/feature_importances/XGBoost_feature_importances_permute.png" width="450"/></a>
-  <a href="images/feature_importances/GradientBoosting_feature_importances_permute.png"><img src="images/feature_importances/GradientBoosting_feature_importances_permute.png" width="450"/></a>
-  <a href="images/feature_importances/SVC_feature_importances_permute.png"><img src="images/feature_importances/SVC_feature_importances_permute.png" width="450"/></a>
-</p>
-
-<p align="center">
-  <a href="images/feature_importances/LogisticRegression_feature_importances_permute.png"><img src="images/feature_importances/LogisticRegression_feature_importances_permute.png" width="450"/></a>
-</p>
-
----
-
-## 🔍 Feature Engineering
-학습 성능 향상을 위해 다음과 같은 파생 피처를 추가:
-- **행동 지표**
-  - `watch_per_login` = 시청시간 ÷ 로그인일수  
-  - `fee_per_profile` = 월요금 ÷ 프로필 수  
-  - `efficiency` = 일평균 시청시간 ÷ 월요금  
-- **로그 변환**
-  - `log_watch_hours`, `log_avg_watch`  
-- **구간화(Binning)**
-  - `age_group` = (18–30, 31–50, 51–70)  
-  - `login_bin` = (0–7일, 8–30일, 31–60일)  
-- **교차 변수**
-  - `subscription_device` = 요금제 × 디바이스  
-
----
-
-## ✅ 분석 결론
-1. **주요 이탈 요인**
-   - 낮은 시청시간 (`watch_hours`, `avg_watch_time_per_day`, `watch_per_login`)  
-   - 최근 로그인일수 ↑ (`last_login_days`, `login_bin`)  
-   - Basic 요금제  
-   - 특정 결제 방식 (Crypto, Gift Card)  
-2. **덜 중요한 요인**
-   - 단순 연령 (`age`)  
-   - 단순 월 요금 (`monthly_fee`)  
-3. **데이터 품질**
-   - 결측치 없음, 클래스 불균형 없음 → 학습 환경 우수
-
----
-## ✅ 프로모션 
-프로모션은 크게 두가지로 나눴습니다.
-하나는 이탈 고갱 대상 전략, 다른 하나는 유지 고객 대상 전략입니다.
+➡️ 연령 자체로는 churn 구분력이 크지 않음. 다만 일부 구간(20대 초반객 대상 전략, 다른 하나는 유지 고객 대상 전략입니다.
 
 이탈 고객 대상 전략
 
