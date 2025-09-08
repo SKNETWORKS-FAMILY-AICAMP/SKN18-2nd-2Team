@@ -37,25 +37,25 @@ def get_churned_customers_with_promotions():
         # 1. 연령별 이탈 방지
         # 대상: 20~30대 그리고 40대 중반에서 60대초반
         if (20 <= row['age'] <= 35) or (45 <= row['age'] <= 65):
-            return "🎂 연령대별 특별 할인 30% + 1달 무료 체험"
+            return "🎂 연령대별 특별 할인 30% + 1주일 무료 체험"
         
         # 2. 월 시청시간 저조자 이탈 방지
         # 대상: 월 시청시간 5시간 미만인자
         elif row['watch_hours'] < 5:
-            return "📺 무료 AI 맞춤 서비스 제공 + 1달 무료 체험"
+            return "📺 무료 AI 맞춤 서비스 제공 + 1주일 무료 체험"
         
         # 3. 장기 미접속자 복귀 유인
         # 대상: 30일 이상 미접속자
         elif row['last_login_days'] >= 30:
-            return "⏰ 복귀 시 최대 70% 할인 + 무료 AI 맞춤 서비스 제공 + 1달 무료 체험"
+            return "⏰ 복귀 시 최대 70% 할인 + 무료 AI 맞춤 서비스 제공 + 1주일 무료 체험"
         
         # 4. 결제 방법 불편 해소
         # 대상: Gift Card와 Crypto 결제자
         elif row['payment_method'] in ['Gift Card', 'Crypto']:
             if row['payment_method'] == 'Gift Card':
-                return "🎁 기프트카드 연속 결제 시 추가 무료 1개월"
+                return "🎁 cradit card 으로 결제 방법 변경 시 첫 결제 할인 혜택"
             else:  # Crypto
-                return "💰 암호화폐 연속 결제 시 추가 무료 1개월"
+                return "💰 cradit card 으로 결제 방법 변경 시 첫 결제 할인 혜택"
         
         # 5. 프리미엄 고객 집중 강화
         # 대상: premium 구독자 및 고액결제자
@@ -89,19 +89,19 @@ def get_all_customers_with_promotions():
         if row['churned'] == 1:  # 이탈 고객
             # 4개 프로모션 로직 - 우선순위 조정으로 고른 분포
             if row['last_login_days'] >= 30:
-                return "🔴 장기 미접속자 복귀 유인: 즉시 복귀 시 60% 할인 + 2달 무료 체험 + 맞춤 콘텐츠 추천"
+                return "🔴 장기 미접속자 복귀 유인: 즉시 복귀 시 60% 할인 + 1주 무료체험 + 맞춤 콘텐츠 추천"
             elif row['watch_hours'] < 5:
-                return "🔴 월 시청시간 저조자: 무료 AI 맞춤 서비스 제공 + 1달 무료 체험"
+                return "🔴 월 시청시간 저조자: 무료 AI 맞춤 서비스 제공 + 1주일 무료 체험"
             elif (20 <= row['age'] <= 30) or (45 <= row['age'] <= 60):
                 return "🔴 연령대별 할인: 이탈률이 높은 연령대 대상 30% 할인 + 연령대 맞춤 콘텐츠"
             elif row['payment_method'] in ['Gift Card', 'Crypto']:
-                return "🔴 결제방법 특화: 동일한 방법으로 연속 결제시 추가 무료 1개월"
+                return "🔴 결제방법 특화: cradit card 으로 결제 방법 변경 시 첫 결제 할인 혜택"
             else:
-                return "🔴 장기 미접속자 복귀 유인: 즉시 복귀 시 60% 할인 + 2달 무료 체험 + 맞춤 콘텐츠 추천"
+                return "🔴 장기 미접속자 복귀 유인: 즉시 복귀 시 60% 할인 + 2주 무료 체험 + 맞춤 콘텐츠 추천"
         else:  # 비이탈 고객 (churned == 0)
             # 유지 고객 대상 프로모션 로직
             if row['subscription_type'] == 'Premium' or row['monthly_fee'] > 15:
-                return "🟢 프리미엄 고객 전용: 4K 콘텐츠 무제한 + 첫 달 무료"
+                return "🟢 프리미엄 고객 전용: 4K 콘텐츠 무제한 + 일주일 무료"
             elif row['device'] in ['Mobile', 'Tablet']:
                 return "🟢 모바일/태블릿 전용: 오프라인 다운로드 무제한"
             elif row['number_of_profiles'] >= 3:
@@ -270,7 +270,7 @@ with tab1:
     
     with col2:
         st.write("**💼 서비스 구조 개선:**")
-        st.write("- 💳 **결제 방법 안정화**: 불안정 결제수단 개선 지원")
+        st.write("- 💳 **결제 방법 안정화**: 다른 결제 수단으로 전환시 혜택 제공으로 결제방법 변경 유도")
         st.write("- 📦 **구독 플랜 최적화**: 고이탈 플랜의 가치 제안 강화")
         st.write("- 🎯 **통합 리텐션 전략**: 5개 핵심 지표 기반 예측 모델 구축")
 
@@ -285,15 +285,15 @@ with tab2:
         
         st.markdown("#### **1. 월 시청시간 저조자 이탈 방지**")
         st.markdown("• **대상**: 월 시청시간 5시간 미만 (이탈 고객)")
-        st.markdown("• **혜택**: 무료 AI 맞춤 서비스 제공 + 1달 무료 체험")
+        st.markdown("• **혜택**: 무료 AI 맞춤 서비스 제공 + 1주일 무료 체험")
         
         st.markdown("#### **2. 장기 미접속자 복귀 유인**")
         st.markdown("• **대상**: 30일 이상 미접속자 (이탈 고객)")
-        st.markdown("• **혜택**: 복귀 시 최대 70% 할인 + 무료 AI 맞춤 서비스 제공 + 1달 무료 체험")
+        st.markdown("• **혜택**: 복귀 시 최대 70% 할인 + 무료 AI 맞춤 서비스 제공 + 1주일 무료 체험")
         
         st.markdown("#### **3. 결제 방법 불편 해소**")
         st.markdown("• **대상**: Gift Card와 Crypto 결제자 (이탈 고객)")
-        st.markdown("• **혜택**: 동일한 방법으로 연속 결제시 추가 무료 1개월")
+        st.markdown("• **혜택**: cradit card 으로 결제 방법 변경 시 첫 결제 할인 혜택")
 
     with col_strategy2:
         st.markdown("### 🚀 **유지 대상 고객 전략**")
