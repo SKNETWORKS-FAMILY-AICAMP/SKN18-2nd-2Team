@@ -34,22 +34,18 @@ def get_churned_customers_with_promotions():
     
     # 업그레이드된 프로모션 추천 로직 (이탈 고객 대상)
     def recommend_promotion(row):
-        # 1. 연령별 이탈 방지
-        # 대상: 20~30대 그리고 40대 중반에서 60대초반
-        if (20 <= row['age'] <= 35) or (45 <= row['age'] <= 65):
-            return "🎂 연령대별 특별 할인 30% + 1주일 무료 체험"
         
-        # 2. 월 시청시간 저조자 이탈 방지
+        # 1. 월 시청시간 저조자 이탈 방지
         # 대상: 월 시청시간 5시간 미만인자
-        elif row['watch_hours'] < 5:
+        if row['watch_hours'] < 5:
             return "📺 무료 AI 맞춤 서비스 제공 + 1주일 무료 체험"
         
-        # 3. 장기 미접속자 복귀 유인
+        # 2. 장기 미접속자 복귀 유인
         # 대상: 30일 이상 미접속자
         elif row['last_login_days'] >= 30:
             return "⏰ 복귀 시 최대 70% 할인 + 무료 AI 맞춤 서비스 제공 + 1주일 무료 체험"
         
-        # 4. 결제 방법 불편 해소
+        # 3. 결제 방법 불편 해소
         # 대상: Gift Card와 Crypto 결제자
         elif row['payment_method'] in ['Gift Card', 'Crypto']:
             if row['payment_method'] == 'Gift Card':
@@ -57,22 +53,22 @@ def get_churned_customers_with_promotions():
             else:  # Crypto
                 return "💰 cradit card 으로 결제 방법 변경 시 첫 결제 할인 혜택"
         
-        # 5. 프리미엄 고객 집중 강화
+        # 4. 프리미엄 고객 집중 강화
         # 대상: premium 구독자 및 고액결제자
         elif row['subscription_type'] == 'Premium' or row['monthly_fee'] > 15:
             return "👑 프리미엄 고객 전용: 4K 콘텐츠 무제한 + 첫 달 무료"
         
-        # 6. 디바이스별 맞춤 전략
+        # 5. 디바이스별 맞춤 전략
         # 대상: 모바일과 태블릿
         elif row['device'] in ['Mobile', 'Tablet']:
             return "📱 모바일/태블릿 전용: 오프라인 다운로드 무제한"
         
-        # 7. 다계정자 특별 강화
+        # 6. 다계정자 특별 강화
         # 대상: 3개 이상 프로필 사용자
         elif row['number_of_profiles'] >= 3:
             return "👨‍👩‍👧‍👦 다계정 특별 혜택: 프로필 무제한 + 키즈 콘텐츠 무료"
         
-        # 8. 기본 복귀 프로모션 (기타 이탈 고객)
+        # 7. 기본 복귀 프로모션 (기타 이탈 고객)
         else:
             return "🎯 기본 복귀 혜택: 무료 AI 맞춤 서비스 제공"
     
@@ -92,8 +88,6 @@ def get_all_customers_with_promotions():
                 return "🔴 장기 미접속자 복귀 유인: 즉시 복귀 시 60% 할인 + 1주 무료체험 + 맞춤 콘텐츠 추천"
             elif row['watch_hours'] < 5:
                 return "🔴 월 시청시간 저조자: 무료 AI 맞춤 서비스 제공 + 1주일 무료 체험"
-            elif (20 <= row['age'] <= 30) or (45 <= row['age'] <= 60):
-                return "🔴 연령대별 할인: 이탈률이 높은 연령대 대상 30% 할인 + 연령대 맞춤 콘텐츠"
             elif row['payment_method'] in ['Gift Card', 'Crypto']:
                 return "🔴 결제방법 특화: cradit card 으로 결제 방법 변경 시 첫 결제 할인 혜택"
             else:
