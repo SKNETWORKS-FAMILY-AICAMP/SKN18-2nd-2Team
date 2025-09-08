@@ -41,6 +41,19 @@
 <p align="center">
   <a href=/images/ERD.png"><img src="images/ERD.png" width="500"/></a>
 
+---
+
+### 전처리 및 EDA
+- target설정
+- target:churned
+- 필요 없는 컬럼 "customer_id"제거
+- 데이터를 train/test로 분류
+- 모델 학습은 train으로만 진행
+- 각 feature에 대해서 수치형 데이터와 문자형(카테고리) 데이터로 분류
+- 수치형 데이터 features: age, watch_hours, last_login_days, monthly_fee, number_of_profiles, avg_watch_time_per_day
+- 문자형(카테고리) 데이터 features: gender, subscription_type, region, device, payment_method, favorite_genre
+- 각 feature에 대한 상관관계를 파악 후 각 feature의 target에 대한 상관관계 분석 => 이탈자(churned)의 features를 파악해 이탈(churned)을 방지하기 위한 전략(마케팅, 서비스 개선 등)마련
+
 
 
 ## 🖼️ 시각화 결과
