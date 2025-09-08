@@ -34,7 +34,10 @@
   </tr>
 </table>
 
+## 🌐데이터 출처
+| https://www.kaggle.com/datasets/abdulwadood11220/netflix-customer-churn-dataset/data
 
+---
 
 ## 📊 데이터 개요
 
