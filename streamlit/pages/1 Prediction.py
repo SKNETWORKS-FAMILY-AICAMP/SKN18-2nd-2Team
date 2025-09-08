@@ -3,10 +3,10 @@ import pandas as pd
 import streamlit as st
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
-from utils import get_config
-from model import load_saved_model
-from preprocess import feature_engineering
-from database import Database
+from con_database.utils import get_config
+from con_database.model import load_saved_model
+from con_database.preprocess import feature_engineering
+from con_database.database import Database
 from sidebar_utils import *
 
 #####################################

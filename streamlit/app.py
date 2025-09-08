@@ -88,4 +88,4 @@ def autoplay_audio(file_path: str):
 
 if __name__ == "__main__":
     st.session_state["current_page"] = "app"
-    setup_css_styles(), set_page(), login_button(), after_login(), set_sidebar(), ad(), autoplay_audio("./images/audio_netflix.mp3")
+    setup_css_styles(), set_page(), login_button(), after_login(), autoplay_audio("./images/audio_netflix.mp3"), set_sidebar(), ad(), 

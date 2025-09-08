@@ -3,8 +3,8 @@ import streamlit as st
 import pandas as pd
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
-from utils import get_config
-from database import Database
+from con_database.utils import get_config
+from con_database.database import Database
 from sidebar_utils import *
 
 ###############################
