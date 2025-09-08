@@ -3,9 +3,9 @@ import pandas as pd
 import streamlit as st
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
-from con_database.utils import get_config
-from con_database.model import load_saved_model
-from con_database.preprocess import feature_engineering
+from modeling.utils import get_config
+from modeling.model import load_saved_model
+from modeling.preprocess import feature_engineering
 from con_database.database import Database
 from sidebar_utils import *
 
