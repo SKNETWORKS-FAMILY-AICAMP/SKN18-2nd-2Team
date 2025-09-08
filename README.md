@@ -4,6 +4,7 @@
 | <img src="https://i.pinimg.com/474x/e3/94/30/e39430434d2b8207188f880ac66c6411.jpg" width="100" height="120"/> | <img src="https://i.pinimg.com/564x/1b/a2/e6/1ba2e6d1d4874546c70c91f1024e17fb.jpg" width="100" height="120" /> | <img src="https://wallpapers.com/images/hd/netflix-profile-pictures-1000-x-1000-dyrp6bw6adbulg5b.jpg" width="100"  height="120"/> | <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" width="100" height="120"/> | <img src="https://wallpapers.com/images/hd/netflix-profile-pictures-1000-x-1000-88wkdmjrorckekha.jpg" width="100" height="120"/> |
 |----------------------------------------------------|----------------------------------------------------|----------------------------------------------------|---------------------------------------------------|---------------------------------------------------|
 | 안시현                                                | 김규리                                                | 김민주                                                | 김주석                                                | 최준호                                               |
+| 전체적인 모델링 및 총괄                                               | 데이터 분석, 모델링, streamlit 기능구현, 코드 취합                                                | streamlit 구현 및 lightgbm 모델링                                                | streamlit 기능구현 및 모델링(랜덤포레스트)                                                | EDA 및 전치리/머신러닝 모델 학습 및 테스트 관련 모델링                                               |
 
 
 ## 📊 데이터 개요
