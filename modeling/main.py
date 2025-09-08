@@ -5,7 +5,7 @@ from model import train_and_evaluate, load_models
 
 
 def main():
-    train_df, test_df = load_data("./data/train.csv", "./data/test.csv")
+    train_df, test_df = load_data("../data/train.csv", "../data/test.csv")
 
     EDA(train_df)
 

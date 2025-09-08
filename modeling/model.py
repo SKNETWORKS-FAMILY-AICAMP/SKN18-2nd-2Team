@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score
 from imblearn.pipeline import Pipeline as ImbPipeline
 from imblearn.over_sampling import SMOTE
-from .utils import save_feature_importances_from_pipeline
+from utils import save_permutation_importance_original
 from sklearn.linear_model import LogisticRegression, RidgeClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
@@ -22,7 +22,7 @@ import lightgbm as lgb
 from catboost import CatBoostClassifier
 
 RANDOM_STATE = 42
-MODEL_DIR = "./saved_models"
+MODEL_DIR = "../saved_models"
 
 def load_models():
     return {
@@ -59,10 +59,13 @@ def train_and_evaluate(model, model_name, X, y, testset, test_target, pre):
     
     # 피처 중요도 저장 (Validation set 기준)
     out_dir = "./images/feature_importances"
-    out_png = os.path.join(out_dir, f"{model_name}_feature_importances.png")
+    out_png = os.path.join(out_dir, f"{model_name}_feature_importances_permute.png")
     
-    save_feature_importances_from_pipeline(pipe, model_name, X_val, y_val, out_png, top_k=30, random_state=RANDOM_STATE)
-    
+    # 원본 컬럼 단위(사람이 이해하기 쉬운) 뷰
+    save_permutation_importance_original(
+        pipe, model_name, X_val, y_val,
+        out_png, top_k=30, random_state=RANDOM_STATE
+    )
     # validation
     y_val_pred  = pipe.predict(X_val)
     val_acc     = accuracy_score(y_val, y_val_pred)

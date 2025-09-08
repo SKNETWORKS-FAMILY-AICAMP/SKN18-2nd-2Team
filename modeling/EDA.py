@@ -15,7 +15,7 @@ def EDA(train_df: pd.DataFrame):
     sns.heatmap(corr, annot=True, cmap='coolwarm', fmt=".2f")
     plt.title('이탈률과 상관관계')
     plt.tight_layout()
-    plt.savefig("./images/correlation_heatmap.png")
+    plt.savefig("../images/correlation_heatmap.png")
     plt.close()
 
     # 결측치 시각화
@@ -26,7 +26,7 @@ def EDA(train_df: pd.DataFrame):
     plt.ylabel("결측치 개수")
     plt.title("컬럼별 결측치 개수")
     plt.tight_layout()
-    plt.savefig("./images/train_data_missing_values.png")
+    plt.savefig("../images/train_data_missing_values.png")
     plt.close()
 
     # 타겟분포
@@ -36,7 +36,7 @@ def EDA(train_df: pd.DataFrame):
     plt.xlabel("이탈 여부")
     plt.ylabel("개수")
     plt.tight_layout()
-    plt.savefig("./images/target_distribution.png")
+    plt.savefig("../images/target_distribution.png")
     plt.close()
 
     # 연령분포
@@ -46,7 +46,7 @@ def EDA(train_df: pd.DataFrame):
     plt.xlabel("나이")
     plt.ylabel("개수")
     plt.tight_layout()
-    plt.savefig("./images/age_distribution.png")
+    plt.savefig("../images/age_distribution.png")
     plt.close()
 
     # churned 여부에 따른 나이 분포
@@ -56,7 +56,7 @@ def EDA(train_df: pd.DataFrame):
     plt.xlabel("나이")
     plt.ylabel("밀도")
     plt.tight_layout()
-    plt.savefig("./images/age_distribution_by_churned.png")
+    plt.savefig("../images/age_distribution_by_churned.png")
     plt.close()
 
     # 시청시간 분포 
@@ -66,7 +66,7 @@ def EDA(train_df: pd.DataFrame):
     plt.xlabel("시청 시간 (시간)")
     plt.ylabel("빈도수")
     plt.tight_layout()
-    plt.savefig("./images/watch_hours_distribution.png")
+    plt.savefig("../images/watch_hours_distribution.png")
     plt.close()
 
     # 이탈여부별 시청시간 분포
@@ -76,7 +76,7 @@ def EDA(train_df: pd.DataFrame):
     plt.xlabel("Churned 여부")
     plt.ylabel("시청시간 (시간)")
     plt.tight_layout()
-    plt.savefig("./images/watch_hours_distribution_by_churned.png")
+    plt.savefig("../images/watch_hours_distribution_by_churned.png")
     plt.close()
 
     # 월 요금 vs 이탈여부
@@ -86,7 +86,7 @@ def EDA(train_df: pd.DataFrame):
     plt.xlabel("Churned 여부")
     plt.ylabel("월 요금 ($)")
     plt.tight_layout()
-    plt.savefig("./images/monthly_fee_distribution_by_churned.png")
+    plt.savefig("../images/monthly_fee_distribution_by_churned.png")
     plt.close()
 
     # 요금제 유형별 이탈률
@@ -96,7 +96,7 @@ def EDA(train_df: pd.DataFrame):
     plt.xlabel("구독 유형")
     plt.ylabel("이탈률")
     plt.tight_layout()
-    plt.savefig("./images/subscription_type_churn_rate.png")
+    plt.savefig("../images/subscription_type_churn_rate.png")
     plt.close()
 
     # 최근 로그인과 이탈여부
@@ -106,5 +106,5 @@ def EDA(train_df: pd.DataFrame):
     plt.xlabel("Churned 여부")
     plt.ylabel("최근 로그인 후 경과일 (일)")
     plt.tight_layout()
-    plt.savefig("./images/last_login_days_distribution_by_churned.png")
+    plt.savefig("../images/last_login_days_distribution_by_churned.png")
     plt.close()
